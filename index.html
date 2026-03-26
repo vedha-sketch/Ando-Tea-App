@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ando Dynamic Scape - Nihonga Light Edition</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { margin: 0; padding: 0; overflow: hidden; background: #E4E1D8; font-family: 'DM Serif Display', serif; }
+    .font-sans { font-family: 'DM Sans', sans-serif !important; }
+    
+    .paper-texture {
+      position: absolute;
+      inset: 0;
+      mix-blend-mode: multiply;
+      opacity: 0.6;
+      pointer-events: none;
+      z-index: 60;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.03' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='%23ffffff'/%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4' style='mix-blend-mode: multiply;'/%3E%3C/svg%3E");
+    }
+
+    .mist-layer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(238,236,228,0.95) 0%, rgba(238,236,228,0.4) 30%, transparent 100%);
+      pointer-events: none;
+      z-index: 5;
+    }
+    
+    .watercolor-edge {
+      filter: url(#watercolor-bleed);
+    }
+    @keyframes bambooSway0 {
+      0%, 100% { transform: skewX(0deg); }
+      50% { transform: skewX(3deg); }
+    }
+    @keyframes bambooSway1 {
+      0%, 100% { transform: skewX(0deg); }
+      50% { transform: skewX(4deg); }
+    }
+    @keyframes bambooSway2 {
+      0%, 100% { transform: skewX(0deg); }
+      50% { transform: skewX(5deg); }
+    }
+    @keyframes bellSwing {
+      0%, 100% { transform-origin: top center; transform: rotate(0deg); }
+      10% { transform: rotate(12deg); }
+      20% { transform: rotate(-10deg); }
+      30% { transform: rotate(8deg); }
+      40% { transform: rotate(-6deg); }
+      50% { transform: rotate(4deg); }
+      60% { transform: rotate(-3deg); }
+      70% { transform: rotate(2deg); }
+      80% { transform: rotate(-1deg); }
+      90% { transform: rotate(0.5deg); }
+    }
+    @keyframes sakuraFall {
+      0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0.8; }
+      25% { transform: translateY(25vh) translateX(20px) rotate(90deg); opacity: 0.7; }
+      50% { transform: translateY(50vh) translateX(-15px) rotate(180deg); opacity: 0.5; }
+      75% { transform: translateY(75vh) translateX(25px) rotate(270deg); opacity: 0.3; }
+      100% { transform: translateY(105vh) translateX(-10px) rotate(360deg); opacity: 0; }
+    }
+    @keyframes snowfall {
+      0% { transform: translateY(0) translateX(0); opacity: 0.7; }
+      25% { transform: translateY(25vh) translateX(10px); }
+      50% { transform: translateY(50vh) translateX(-5px); opacity: 0.5; }
+      75% { transform: translateY(75vh) translateX(8px); }
+      100% { transform: translateY(100vh) translateX(-3px); opacity: 0; }
+    }
+    @keyframes chimeSwing {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(8deg); }
+      75% { transform: rotate(-8deg); }
+    }
+    @keyframes pineLeafFall {
+      0% { transform: translate(0, 0) rotate(0deg); opacity: 0.8; }
+      25% { transform: translate(8px, 25vh) rotate(90deg); opacity: 0.7; }
+      50% { transform: translate(-5px, 50vh) rotate(180deg); opacity: 0.5; }
+      75% { transform: translate(10px, 75vh) rotate(270deg); opacity: 0.3; }
+      100% { transform: translate(3px, 100vh) rotate(360deg); opacity: 0; }
+    }
+    @keyframes treeShake {
+      0%, 100% { transform: translateX(0); }
+      15% { transform: translateX(6px); }
+      30% { transform: translateX(-5px); }
+      45% { transform: translateX(3px); }
+      60% { transform: translateX(-2px); }
+      75% { transform: translateX(1px); }
+    }
+    @keyframes mountainScroll1 { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @keyframes mountainScroll2 { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @keyframes mountainScroll3 { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script>
+    let audioCtx = null;
+    const PENTATONIC = [277.18, 329.63, 369.99, 415.30, 493.88, 554.37, 659.25];
+    
+    window.playSuikinkutsu = function() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(PENTATONIC[Math.floor(Math.random() * PENTATONIC.length)] * 2, audioCtx.currentTime);
+      
+      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.05);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+      
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 800;
+      filter.Q.value = 15;
+      
+      osc.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 1.5);
+    };
+
+    window.playBellRing = function() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const t = audioCtx.currentTime;
+      // Two metallic bell tones for suzu sound
+      [880, 1318.5].forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.98, t + 1.5);
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(i === 0 ? 0.15 : 0.08, t + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 2.0);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t + i * 0.05);
+        osc.stop(t + 2.0);
+      });
+      // Add shimmer harmonics
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(2637, t);
+      gain2.gain.setValueAtTime(0, t);
+      gain2.gain.linearRampToValueAtTime(0.03, t + 0.01);
+      gain2.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
+      osc2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+      osc2.start(t);
+      osc2.stop(t + 1.0);
+    };
+
+    window.playBark = function() {
+      const audio = new Audio('./DogBark.wav');
+      audio.volume = 0.6;
+      audio.play();
+    };
+
+    window.playTreeRustle = function() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      const bufferSize = audioCtx.sampleRate * 0.6;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.3;
+
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+
+      const bandpass = audioCtx.createBiquadFilter();
+      bandpass.type = 'bandpass';
+      bandpass.frequency.value = 2500;
+      bandpass.Q.value = 0.5;
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+
+      noise.connect(bandpass);
+      bandpass.connect(gain);
+      gain.connect(audioCtx.destination);
+      noise.start();
+    };
+  </script>
+
+  <svg style="width: 0; height: 0; position: absolute;">
+    <filter id="watercolor-bleed" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+      <feGaussianBlur in="displaced" stdDeviation="0.6" />
+    </filter>
+  </svg>
+
+  <script type="text/babel" data-type="module">
+    import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18';
+    import { createRoot } from 'https://esm.sh/react-dom@18/client';
+    import { flushSync } from 'https://esm.sh/react-dom@18';
+    import { motion, AnimatePresence, useAnimationFrame, useMotionValue } from 'https://esm.sh/framer-motion@11?deps=react@18';
+
+    const BIOMES = ['shrine', 'bamboo', 'zen', 'sakura', 'snow'];
+    const rnd = (min, max) => Math.random() * (max - min) + min;
+
+    const CHUNK_WIDTH = 2600;
+
+    const GroundPlane = () => (
+      <div className="absolute bottom-[-5px] w-full h-[20vh] z-[1]" />
+    );
+
+    const WoodBoardwalk = () => (
+      <>
+        <div className="absolute bottom-[-3vh] w-full h-[20vh] z-[5] pointer-events-none drop-shadow-2xl">
+          <svg viewBox="0 0 2600 100" preserveAspectRatio="none" className="w-full h-full">
+             {/* Soft shadow below boardwalk */}
+             <rect x="0" y="28" width="2600" height="4" fill="black" opacity="0.15" rx="2" />
+             {/* Main boardwalk body - warm flat wood tone */}
+             <rect x="0" y="0" width="2600" height="28" fill="#8B7355" />
+             {/* Subtle top highlight */}
+             <rect x="0" y="0" width="2600" height="3" fill="#A08B6E" opacity="0.6" />
+             {/* Soft plank divisions - very subtle */}
+             {Array.from({ length: 40 }).map((_, i) => (
+               <line key={i} x1={i * 65 + 32} y1="0" x2={i * 65 + 32} y2="28" stroke="#6E5D45" strokeWidth="0.8" opacity="0.3" />
+             ))}
+             {/* Bottom edge - darker tone */}
+             <rect x="0" y="22" width="2600" height="6" fill="#6E5D45" opacity="0.4" />
+          </svg>
+        </div>
+      </>
+    );
+
+    const TallGrass = () => (
+      <div className="absolute bottom-[14vh] w-full h-[15vh] z-[4] pointer-events-none">
+        <svg viewBox="0 0 2600 200" preserveAspectRatio="none" className="w-full h-full">
+          <style>{`
+            @keyframes grassSway {
+              0%, 100% { transform: rotate(0deg); }
+              25% { transform: rotate(2deg); }
+              75% { transform: rotate(-2deg); }
+            }
+          `}</style>
+          {/* Grass tufts */}
+          {Array.from({ length: 100 }).map((_, i) => {
+            const x = i * 18 + rnd(-10, 10);
+            const h = rnd(40, 90);
+            const lean = rnd(-8, 8);
+            const green = ['#5A7247', '#4A6038', '#6B8A54', '#3D5230', '#7A9B64'][i % 5];
+            const delay = rnd(0, 3).toFixed(2);
+            const dur = rnd(2.5, 4.5).toFixed(2);
+            return (
+              <path
+                key={i}
+                d={`M${x},200 L${x + lean * 0.3},${200 - h} L${x + lean * 0.3 + 8},${200 - h} L${x + 10},200 Z`}
+                fill={green}
+                opacity={rnd(0.5, 0.8).toFixed(2)}
+                style={{ transformOrigin: `${x + 5}px 200px`, animation: `grassSway ${dur}s ease-in-out ${delay}s infinite` }}
+              />
+            );
+          })}
+        </svg>
+      </div>
+    );
+
+    const StoneBase = () => (
+      <div className="absolute bottom-[-3vh] w-full h-[20vh] z-[4] pointer-events-none drop-shadow-2xl">
+        <svg viewBox="0 0 2600 100" preserveAspectRatio="none" className="w-full h-full">
+           <rect width="2600" height="100" fill="#4B4B4B" />
+           {/* Stone outlines/cracks - perspective lines converging to center top */}
+           {Array.from({ length: 100 }).map((_, i) => {
+             const topX = 1300 + (i - 50) * 12;
+             const bottomX = 1300 + (i - 50) * 30;
+             return (
+               <path
+                 key={i}
+                 d={`M${topX},0 L${bottomX},100`}
+                 stroke="#1A1A1A"
+                 strokeWidth="0.3"
+                 fill="none"
+                 opacity="0.08"
+               />
+             );
+           })}
+        </svg>
+      </div>
+    );
+
+    const Bear = ({ left }) => {
+      const [forward, setForward] = useState(false);
+      const handleTap = (e) => {
+        e.stopPropagation();
+        window.playSuikinkutsu();
+        setForward(prev => !prev);
+      };
+      return (
+        <div
+          className="absolute z-[3] origin-bottom pointer-events-none"
+          style={{ bottom: '14vh', left: `${left}%`, width: '100vw', height: '100vw' }}
+        >
+          <img
+            src={forward ? './BearForward.png' : './BearRight.png'}
+            className="w-full h-full object-contain"
+            draggable="false"
+          />
+          <div onClick={handleTap} className="absolute cursor-pointer" style={{ pointerEvents: 'auto', left: '20%', top: '15%', width: '60%', height: '75%' }} />
+        </div>
+      );
+    };
+
+    const Deer = ({ left }) => {
+      const [isBowing, setIsBowing] = useState(false);
+
+      const handleTap = (e) => {
+        e.stopPropagation();
+        window.playSuikinkutsu();
+        setIsBowing(prev => !prev);
+      };
+
+      return (
+        <div
+          className="absolute z-[3] origin-bottom pointer-events-none"
+          style={{ bottom: '1vh', left: `${left}%`, width: '106vw', height: '106vw' }}
+        >
+          <img
+            src={isBowing ? './deer_new_1.png' : './deer_new_2.png'}
+            className="w-full h-full object-contain"
+            draggable="false"
+          />
+          <div onClick={handleTap} className="absolute cursor-pointer" style={{ pointerEvents: 'auto', left: '20%', top: '15%', width: '60%', height: '75%' }} />
+        </div>
+      );
+    };
+
+    const Tanuki = ({ left }) => {
+      const [isBending, setIsBending] = useState(false);
+      const handleTap = (e) => {
+        e.stopPropagation();
+        window.playSuikinkutsu();
+        setIsBending(prev => !prev);
+      };
+      return (
+        <div
+          className="absolute z-[3] origin-bottom"
+          style={{ bottom: '13vh', left: `${left}%`, width: '70vw' }}
+        >
+          {/* Tanuki on top of rock */}
+          <div
+            onClick={handleTap}
+            className="relative cursor-pointer"
+            style={{ width: '60vw', height: '60vw', margin: '0 auto', marginBottom: '1vh', position: 'relative', zIndex: 1 }}
+          >
+            <img
+              src={isBending ? './TanukiBend.png' : './TanukiStand.png'}
+              className="w-full h-full object-contain pointer-events-none"
+              draggable="false"
+            />
+          </div>
+          {/* Shadow between tanuki and rock */}
+          <svg viewBox="0 0 100 10" className="pointer-events-none" style={{ width: '50%', margin: '-2.5vh auto 0', position: 'relative', zIndex: 1 }}>
+            <ellipse cx="50" cy="5" rx="40" ry="4" fill="black" opacity="0.12" />
+          </svg>
+          {/* Rock underneath - trapezoidal */}
+          <svg viewBox="0 0 140 60" className="w-full" style={{ marginTop: '-4vh', position: 'relative', zIndex: 0 }}>
+            {/* Main rock body - trapezoid with flat top */}
+            <path d="M30,8 L110,8 L130,55 Q70,62 10,55 Z" fill="#6E685E" />
+            {/* Lighter face */}
+            <path d="M35,10 L105,10 L120,50 Q70,56 18,50 Z" fill="#7A7368" />
+            {/* Highlight on top surface */}
+            <path d="M38,10 L100,10 L95,18 L42,18 Z" fill="#8A8578" opacity="0.5" />
+            {/* Subtle edge shadow */}
+            <path d="M10,55 Q70,62 130,55 Q70,58 10,55" fill="#5C5650" opacity="0.3" />
+          </svg>
+        </div>
+      );
+    };
+
+    const DOG_WALK_FRAMES = ['./DogWalk1.png', './DogWalk2.png', './DogWalk4.png'];
+    const DOG_STANDING = './DogStanding.png';
+    const panPausedRef = { current: false };
+
+    const ShibaDog = React.memo(() => {
+      const frameRef = useRef(0);
+      const imgRef = useRef(null);
+      const shadowRef = useRef(null);
+      const walkingRef = useRef(true);
+      const rafRef = useRef(null);
+      const lastFrameTime = useRef(0);
+
+      useEffect(() => {
+        let cancelled = false;
+        const loop = (time) => {
+          if (cancelled) return;
+          if (walkingRef.current && time - lastFrameTime.current > 140) {
+            lastFrameTime.current = time;
+            frameRef.current = (frameRef.current + 1) % DOG_WALK_FRAMES.length;
+            if (imgRef.current) imgRef.current.src = DOG_WALK_FRAMES[frameRef.current];
+          }
+          rafRef.current = requestAnimationFrame(loop);
+        };
+        rafRef.current = requestAnimationFrame(loop);
+        return () => { cancelled = true; cancelAnimationFrame(rafRef.current); };
+      }, []);
+
+      const handleClick = (e) => {
+        e.stopPropagation();
+        if (!walkingRef.current) return;
+        walkingRef.current = false;
+        window.playSuikinkutsu();
+        if (imgRef.current) imgRef.current.src = DOG_STANDING;
+        if (shadowRef.current) shadowRef.current.setAttribute('rx', '44');
+        panPausedRef.current = true;
+        setTimeout(() => {
+          panPausedRef.current = false;
+          walkingRef.current = true;
+          if (shadowRef.current) shadowRef.current.setAttribute('rx', '50');
+          frameRef.current = 0;
+          lastFrameTime.current = 0;
+        }, 2000);
+      };
+
+      return (
+        <div
+          onClick={handleClick}
+          className="absolute z-[45] origin-bottom drop-shadow-2xl cursor-pointer"
+          style={{ left: '50%', transform: 'translateX(-50%)', width: '53vw', height: '36vw', bottom: '-4vh' }}
+        >
+          <img
+            ref={imgRef}
+            src={DOG_WALK_FRAMES[0]}
+            className="object-contain pointer-events-none"
+            style={{ position: 'relative', top: '-17vw', width: '53vw', height: '53vw' }}
+            draggable="false"
+          />
+          <svg viewBox="0 0 100 20" className="absolute bottom-[28%] left-[5%] w-[90%] h-[10%] -z-10 pointer-events-none">
+            <ellipse ref={shadowRef} cx="50" cy="10" rx="50" ry="7" fill="black" opacity="0.18" />
+          </svg>
+        </div>
+      );
+    });
+
+    const ToriiGate = ({ left }) => {
+      const [isOn, setIsOn] = useState(false);
+
+      return (
+        <div
+          className="absolute bottom-[12vh] z-[3] origin-bottom transition-all drop-shadow-2xl pointer-events-none"
+          style={{ left: `${left}%`, width: '140vw', height: '140vw' }}
+        >
+          <img
+            src={isOn ? './TorriGateON.png' : './TorriGate.png'}
+            className="w-full h-full object-contain"
+            draggable="false"
+          />
+          {/* Clickable area - gate center */}
+          <div onClick={(e) => { e.stopPropagation(); window.playSuikinkutsu(); setIsOn(prev => !prev); }}
+            className="absolute cursor-pointer" style={{ pointerEvents: 'auto', left: '25%', top: '10%', width: '50%', height: '80%' }} />
+          {isOn && (
+            <>
+              <div className="absolute pointer-events-none rounded-full" style={{ left: '28%', top: '58%', width: '20%', height: '14%', background: 'radial-gradient(circle, rgba(255,220,120,0.4) 0%, rgba(255,190,80,0.2) 30%, transparent 70%)', filter: 'blur(8px)' }} />
+              <div className="absolute pointer-events-none rounded-full" style={{ left: '52%', top: '58%', width: '20%', height: '14%', background: 'radial-gradient(circle, rgba(255,220,120,0.4) 0%, rgba(255,190,80,0.2) 30%, transparent 70%)', filter: 'blur(8px)' }} />
+            </>
+          )}
+        </div>
+      );
+    };
+
+    const Pagoda = ({ left }) => {
+      const [glowing, setGlowing] = useState(false);
+      const handleTap = (e) => {
+        e.stopPropagation();
+        window.playSuikinkutsu();
+        setGlowing(prev => !prev);
+      };
+      return (
+        <div
+          className="absolute bottom-[14vh] z-[2] origin-bottom drop-shadow-2xl pointer-events-none"
+          style={{ left: `${left}%`, width: '217vw', height: '242vw' }}
+        >
+          <img
+            src="./Shrine.png"
+            className="w-full h-full object-contain"
+            draggable="false"
+          />
+          {/* Clickable area */}
+          <div onClick={handleTap} className="absolute cursor-pointer" style={{ pointerEvents: 'auto', left: '25%', top: '20%', width: '50%', height: '70%' }} />
+          {/* Warm offering glow */}
+          {glowing && (
+            <>
+              <div className="absolute pointer-events-none" style={{
+                left: '3%', top: '75%', width: '50%', height: '25%',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(255,190,80,0.7) 0%, rgba(255,170,60,0.4) 40%, transparent 70%)',
+                filter: 'blur(10px)',
+              }} />
+              <div className="absolute pointer-events-none" style={{
+                left: '-12%', top: '60%', width: '80%', height: '45%',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(255,200,100,0.35) 0%, rgba(255,180,80,0.15) 40%, transparent 70%)',
+                filter: 'blur(25px)',
+              }} />
+            </>
+          )}
+        </div>
+      );
+    };
+
+    const PineTree = ({ left, scale = 1, flip = false }) => {
+      const [shaking, setShaking] = useState(false);
+      const [leaves, setLeaves] = useState([]);
+      const handleTap = (e) => {
+        e.stopPropagation();
+        window.playSuikinkutsu();
+        setShaking(true);
+        setTimeout(() => setShaking(false), 500);
+        // Drop pine leaves
+        const newLeaves = Array.from({ length: 6 }).map((_, i) => ({
+          id: Date.now() + i,
+          x: rnd(30, 70),
+          y: rnd(55, 70),
+          dur: rnd(2, 4).toFixed(1),
+          delay: rnd(0, 0.5).toFixed(2),
+          size: rnd(3, 6),
+        }));
+        setLeaves(newLeaves);
+        setTimeout(() => setLeaves([]), 4500);
+      };
+      return (
+        <div
+          className="absolute bottom-[0vh] z-[2] origin-bottom drop-shadow-2xl pointer-events-none"
+          style={{
+            width: '200vw', height: '280vw', left: `${left}%`,
+            transform: `scaleX(${flip ? -1 : 1}) scale(${scale})`,
+            overflow: 'visible',
+          }}
+        >
+          <div
+            className="w-full h-full"
+            style={{ animation: shaking ? 'treeShake 0.5s ease-out 1' : 'none' }}
+          >
+            <img
+              src="./PineTree.png"
+              className="w-full h-full object-contain"
+              draggable="false"
+            />
+            {/* Clickable area - centered on trunk */}
+            <div onClick={handleTap} className="absolute cursor-pointer" style={{ pointerEvents: 'auto', left: '30%', top: '20%', width: '40%', height: '70%' }} />
+          </div>
+          {/* Falling leaves */}
+          {leaves.map(l => (
+            <div key={l.id} className="absolute pointer-events-none" style={{
+              left: `${l.x}%`, top: `${l.y}%`,
+              width: `${l.size}px`, height: `${l.size * 2}px`,
+              background: '#4A6038',
+              borderRadius: '50% 50% 50% 0',
+              opacity: 0.8,
+              animation: `pineLeafFall ${l.dur}s ease-in ${l.delay}s forwards`,
+            }} />
+          ))}
+        </div>
+      );
+    };
+
+    const SnowClumps = () => (
+      <div className="absolute bottom-[16vh] w-full h-[15vh] z-[4] pointer-events-none">
+        <svg viewBox="0 0 2600 200" preserveAspectRatio="none" className="w-full h-full">
+          {Array.from({ length: 60 }).map((_, i) => {
+            const x = i * 45 + rnd(-15, 15);
+            const rx = rnd(20, 45);
+            const ry = rnd(12, 22);
+            const y = 200 - rnd(0, 15);
+            return (
+              <g key={i}>
+                <ellipse cx={x} cy={y} rx={rx} ry={ry} fill="white" opacity={rnd(0.85, 1).toFixed(2)} />
+                <ellipse cx={x - rx * 0.2} cy={y - ry * 0.3} rx={rx * 0.6} ry={ry * 0.4} fill="white" opacity="0.7" />
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    );
+
+    const BeechTree = ({ left, scale = 1, flip = false }) => {
+      const shakeRef = useRef(null);
+      const handleClick = (e) => {
+        e.stopPropagation();
+        window.playSuikinkutsu();
+        if (shakeRef.current) {
+          shakeRef.current.style.animation = 'none';
+          shakeRef.current.offsetHeight;
+          shakeRef.current.style.animation = 'treeShake 0.6s ease-out';
+        }
+      };
+      return (
+        <div className="absolute bottom-[12vh] z-[2] drop-shadow-2xl origin-bottom pointer-events-none"
+             style={{ left: `${left}%`, transform: `scaleX(${flip ? -1 : 1}) scale(${scale})`, width: '217vw', height: '266vw' }}>
+          <div ref={shakeRef} className="w-full h-full origin-bottom">
+            <img src="SnowTree.png" alt="Snow Tree" className="w-full h-full object-contain" draggable="false" />
+            <div onClick={handleClick} className="absolute cursor-pointer" style={{ pointerEvents: 'auto', left: '25%', top: '15%', width: '50%', height: '75%' }} />
+          </div>
+        </div>
+      );
+    };
+
+    const SnowMacaque = ({ left }) => {
+      const [showBaby, setShowBaby] = useState(false);
+      return (
+        <div
+          className="absolute bottom-[12vh] z-[3] drop-shadow-2xl origin-bottom pointer-events-none"
+          style={{ left: `${left}%`, width: '217vw', height: '266vw' }}
+        >
+          <img
+            src={showBaby ? './SnowTreeBaby.png' : './SnowTreeMonkey.png'}
+            className="w-full h-full object-contain"
+            draggable="false"
+          />
+          <div onClick={(e) => { e.stopPropagation(); window.playSuikinkutsu(); setShowBaby(prev => !prev); }}
+            className="absolute cursor-pointer" style={{ pointerEvents: 'auto', left: '25%', top: '15%', width: '50%', height: '75%' }} />
+        </div>
+      );
+    };
+
+    const MONKEY_FRAMES = ['./MonkeyRight.png', './MonkeyMiddle.png', './MonkeyForward.png'];
+    const Crane = ({ left }) => {
+      const [standing, setStanding] = useState(false);
+      return (
+        <div
+          onClick={(e) => { e.stopPropagation(); window.playSuikinkutsu(); setStanding(prev => !prev); }}
+          className="absolute bottom-[14vh] z-[3] cursor-pointer drop-shadow-xl origin-bottom"
+          style={{ left: `${left}%`, width: '85vw', height: '85vw' }}
+        >
+          <img
+            src={standing ? './CraneWings.png' : './CraneStand.png'}
+            className="w-full h-full object-contain pointer-events-none"
+            draggable="false"
+          />
+        </div>
+      );
+    };
+
+    const StackingStones = ({ left }) => {
+      const [toppled, setToppled] = useState(false);
+      return (
+        <div
+          onClick={(e) => { e.stopPropagation(); window.playSuikinkutsu(); setToppled(prev => !prev); }}
+          className="absolute bottom-[12vh] z-[3] cursor-pointer drop-shadow-xl origin-bottom"
+          style={{ left: `${left}%`, width: '68vw', height: '111vw' }}
+        >
+          <svg viewBox="0 0 100 180" className="w-full h-full">
+            {toppled ? (
+              /* Toppled stones scattered */
+              <>
+                <ellipse cx="30" cy="165" rx="22" ry="12" fill="#8A8078" />
+                <ellipse cx="28" cy="163" rx="18" ry="9" fill="#9B9488" />
+                <ellipse cx="65" cy="170" rx="16" ry="10" fill="#7A7368" />
+                <ellipse cx="63" cy="168" rx="12" ry="7" fill="#8A8078" />
+                <ellipse cx="75" cy="155" rx="12" ry="8" fill="#6E685E" />
+                <ellipse cx="73" cy="153" rx="9" ry="5" fill="#7A7368" />
+                <ellipse cx="48" cy="160" rx="9" ry="6" fill="#9B9488" />
+                <ellipse cx="47" cy="158" rx="6" ry="4" fill="#A09889" />
+              </>
+            ) : (
+              /* Stacked stones (cairn) */
+              <>
+                {/* Shadow */}
+                <ellipse cx="50" cy="175" rx="25" ry="5" fill="black" opacity="0.15" />
+                {/* Bottom stone */}
+                <ellipse cx="50" cy="163" rx="22" ry="12" fill="#8A8078" />
+                <ellipse cx="48" cy="160" rx="18" ry="9" fill="#9B9488" />
+                {/* Second stone */}
+                <ellipse cx="50" cy="148" rx="17" ry="10" fill="#7A7368" />
+                <ellipse cx="48" cy="145" rx="13" ry="7" fill="#8A8078" />
+                {/* Third stone */}
+                <ellipse cx="50" cy="133" rx="13" ry="8" fill="#6E685E" />
+                <ellipse cx="48" cy="131" rx="10" ry="5" fill="#7A7368" />
+                {/* Top stone */}
+                <ellipse cx="50" cy="120" rx="9" ry="6" fill="#9B9488" />
+                <ellipse cx="48" cy="118" rx="6" ry="4" fill="#A09889" />
+              </>
+            )}
+          </svg>
+        </div>
+      );
+    };
+
+    const Snowman = ({ left }) => {
+      const [toppled, setToppled] = useState(false);
+      const handleTap = (e) => {
+        e.stopPropagation();
+        window.playSuikinkutsu();
+        setToppled(prev => !prev);
+      };
+      return (
+        <div
+          onClick={handleTap}
+          className="absolute bottom-[4vh] z-[3] cursor-pointer origin-bottom"
+          style={{ left: `${left}%`, width: '42vw', height: '50vh' }}
+        >
+          <svg viewBox="0 0 80 120" className="w-full h-full" overflow="visible">
+            {/* Shadow */}
+            <ellipse cx="40" cy="115" rx="25" ry="5" fill="black" opacity="0.12" />
+            {toppled ? (
+              /* Toppled state - head rolled off */
+              <g>
+                {/* Body still standing */}
+                <ellipse cx="40" cy="90" rx="22" ry="22" fill="#F0EDE8" />
+                <ellipse cx="35" cy="85" rx="10" ry="8" fill="#F5F2ED" opacity="0.5" />
+                {/* Head rolled to the side */}
+                <ellipse cx="65" cy="105" rx="14" ry="14" fill="#F0EDE8" />
+                <ellipse cx="62" cy="102" rx="6" ry="5" fill="#F5F2ED" opacity="0.5" />
+                {/* Eyes on rolled head */}
+                <circle cx="60" cy="102" r="1.5" fill="#2D2422" />
+                <circle cx="68" cy="104" r="1.5" fill="#2D2422" />
+                {/* Bucket hat fallen */}
+                <rect x="55" y="90" width="20" height="8" rx="2" fill="#6B5B4F" transform="rotate(25, 65, 94)" />
+                <rect x="52" y="96" width="26" height="3" rx="1" fill="#5C5046" transform="rotate(25, 65, 97)" />
+              </g>
+            ) : (
+              /* Standing state */
+              <g>
+                {/* Body */}
+                <ellipse cx="40" cy="90" rx="22" ry="22" fill="#F0EDE8" />
+                <ellipse cx="35" cy="85" rx="10" ry="8" fill="#F5F2ED" opacity="0.5" />
+                {/* Head */}
+                <ellipse cx="40" cy="58" rx="16" ry="16" fill="#F0EDE8" />
+                <ellipse cx="36" cy="54" rx="7" ry="6" fill="#F5F2ED" opacity="0.5" />
+                {/* Eyes */}
+                <circle cx="35" cy="56" r="1.8" fill="#2D2422" />
+                <circle cx="45" cy="56" r="1.8" fill="#2D2422" />
+                {/* Bucket hat */}
+                <rect x="26" y="40" width="28" height="12" rx="3" fill="#6B5B4F" />
+                <rect x="22" y="50" width="36" height="4" rx="1.5" fill="#5C5046" />
+              </g>
+            )}
+          </svg>
+        </div>
+      );
+    };
+
+    const SnowMonkey = ({ left }) => {
+      const [frame, setFrame] = useState(0);
+      return (
+        <div
+          onClick={(e) => { e.stopPropagation(); window.playSuikinkutsu(); setFrame(prev => (prev + 1) % MONKEY_FRAMES.length); }}
+          className="absolute bottom-[14vh] z-[3] cursor-pointer drop-shadow-xl origin-bottom"
+          style={{ left: `${left}%`, width: '85vw', height: '85vw' }}
+        >
+          <img
+            src={MONKEY_FRAMES[frame]}
+            className="w-full h-full object-contain pointer-events-none"
+            draggable="false"
+          />
+        </div>
+      );
+    };
+
+    const sakuraBurstRef = { current: null };
+
+    const SakuraTree = ({ left, scale = 1, flip = false }) => {
+      const shakeRef = useRef(null);
+
+      const handleClick = (e) => {
+        e.stopPropagation();
+        window.playSuikinkutsu();
+        const rect = e.currentTarget.getBoundingClientRect();
+        const centerX = ((rect.left + rect.width / 2) / window.innerWidth) * 100;
+        const centerY = ((rect.top + rect.height * 0.4) / window.innerHeight) * 100;
+        if (sakuraBurstRef.current) sakuraBurstRef.current(centerX, centerY);
+        if (shakeRef.current) {
+          shakeRef.current.style.animation = 'none';
+          shakeRef.current.offsetHeight;
+          shakeRef.current.style.animation = 'treeShake 0.6s ease-out';
+        }
+      };
+
+      return (
+        <div
+          className="absolute bottom-[-8vh] z-[2] origin-bottom pointer-events-none drop-shadow-2xl"
+          style={{ width: '181vw', height: '205vw', left: `${left}%`, transform: `scaleX(${flip ? -1 : 1}) scale(${scale})` }}>
+          <div ref={shakeRef} className="w-full h-full origin-bottom">
+            <img
+              src="./CherryBlossom.png?v=2"
+              className="w-full h-full object-contain"
+              draggable="false"
+            />
+            <div onClick={handleClick} className="absolute cursor-pointer" style={{ pointerEvents: 'auto', left: '25%', top: '15%', width: '50%', height: '75%' }} />
+          </div>
+        </div>
+      );
+    };
+
+    const StoneLantern = ({ left }) => {
+      const [isOn, setIsOn] = useState(false);
+
+      return (
+          <div
+            className="absolute bottom-[8vh] z-[4] origin-bottom drop-shadow-xl pointer-events-none"
+            style={{ left: `${left}%`, width: '60vw', height: '85vw' }}
+          >
+            <div className="relative w-full h-full">
+              <img
+                src="./StoneLantern.png"
+                className="w-full h-full object-contain"
+                draggable="false"
+              />
+              <div onClick={(e) => { e.stopPropagation(); window.playSuikinkutsu(); setIsOn(prev => !prev); }}
+                className="absolute cursor-pointer" style={{ pointerEvents: 'auto', left: '25%', top: '20%', width: '50%', height: '70%' }} />
+              {isOn && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ top: '-18%' }}>
+                  <div style={{
+                    width: '60%',
+                    height: '35%',
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(255,220,120,0.5) 0%, rgba(255,190,80,0.25) 30%, transparent 70%)',
+                    filter: 'blur(8px)',
+                  }} />
+                </div>
+              )}
+            </div>
+          </div>
+      );
+    };
+
+    const BIOME_OCCUPIED = {
+      shrine: [15, 25, 42, 52, 68],
+      bamboo: [45, 50, 55],
+      zen: [10, 20, 25, 35, 40, 50, 52, 62, 65, 75, 78],
+      sakura: [12, 22, 28, 38, 42, 52, 55, 65, 68],
+      snow: [15, 45, 70],
+    };
+
+    const getLanternPositions = (biome) => {
+      const occupied = BIOME_OCCUPIED[biome] || [];
+      const positions = [];
+      for (let p = 10; p <= 80; p += 12) {
+        const tooClose = occupied.some(o => Math.abs(o - p) < 8);
+        if (!tooClose) positions.push(p);
+      }
+      return positions;
+    };
+
+    const WindChime = ({ left }) => {
+      const [swinging, setSwinging] = useState(false);
+      const handleTap = (e) => {
+        e.stopPropagation();
+        window.playSuikinkutsu();
+        setSwinging(true);
+        setTimeout(() => setSwinging(false), 2000);
+      };
+      return (
+        <div
+          onClick={handleTap}
+          className="absolute bottom-[5vh] z-[3] cursor-pointer"
+          style={{ left: `${left}%`, width: '30vw', height: '55vh' }}
+        >
+          <svg viewBox="0 0 100 240" className="w-full h-full" overflow="visible">
+            {/* Vertical pole */}
+            <line x1="30" y1="40" x2="30" y2="240" stroke="#6B5B4F" strokeWidth="4" strokeLinecap="round" />
+            {/* Horizontal arm */}
+            <line x1="28" y1="42" x2="70" y2="38" stroke="#6B5B4F" strokeWidth="3.5" strokeLinecap="round" />
+            {/* Small decorative cap on top */}
+            <circle cx="30" cy="38" r="4" fill="#5C5046" />
+            {/* String from arm tip */}
+            <line x1="68" y1="38" x2="68" y2="55" stroke="#5C5046" strokeWidth="1" />
+            {/* Bell body - hanging from arm */}
+            <g style={{
+              transformOrigin: '68px 55px',
+              animation: swinging ? 'chimeSwing 0.4s ease-in-out 5' : 'none',
+            }}>
+              <ellipse cx="68" cy="58" rx="4" ry="2" fill="#5C5046" />
+              <path d="M60,61 L60,83 Q68,87 76,83 L76,61 Z" fill="#8A9BAA" opacity="0.8" />
+              <path d="M62,61 L62,81 Q68,85 74,81 L74,61 Z" fill="#A0B5C5" opacity="0.6" />
+              {/* Clapper */}
+              <line x1="68" y1="83" x2="68" y2="95" stroke="#5C5046" strokeWidth="1" />
+              <circle cx="68" cy="97" r="3" fill="#5C5046" />
+              {/* Paper strip */}
+              <path d={swinging ? "M68,97 Q73,113 66,133 Q70,143 65,158" : "M68,97 Q70,113 67,133 Q69,143 66,158"}
+                stroke="#C4453A" strokeWidth="3" fill="none" strokeLinecap="round"
+                style={{ animation: swinging ? 'chimeSwing 0.6s ease-in-out 3' : 'none', transformOrigin: '68px 97px' }}
+              />
+            </g>
+          </svg>
+        </div>
+      );
+    };
+
+    const StoneBasin = ({ left }) => {
+      const [rippling, setRippling] = useState(false);
+      const handleTap = (e) => {
+        e.stopPropagation();
+        window.playSuikinkutsu();
+        setRippling(true);
+        setTimeout(() => setRippling(false), 1500);
+      };
+      return (
+        <div
+          onClick={handleTap}
+          className="absolute bottom-[16vh] z-[3] cursor-pointer origin-bottom"
+          style={{ left: `${left}%`, width: '45vw', height: '45vw' }}
+        >
+          <svg viewBox="0 0 100 100" className="w-full h-full" overflow="visible">
+            {/* Shadow */}
+            <ellipse cx="50" cy="88" rx="35" ry="6" fill="black" opacity="0.1" />
+            {/* Basin body */}
+            <path d="M25,45 L20,80 Q50,90 80,80 L75,45 Z" fill="#7A7368" />
+            <path d="M28,48 L24,77 Q50,86 76,77 L72,48 Z" fill="#8A8578" />
+            {/* Water surface */}
+            <ellipse cx="50" cy="48" rx="24" ry="8" fill="#6A8FA0" opacity="0.7" />
+            <ellipse cx="48" cy="47" rx="18" ry="5" fill="#7CA8B8" opacity="0.5" />
+            {/* Ripples when tapped */}
+            {rippling && (
+              <>
+                <ellipse cx="50" cy="48" rx="10" ry="3" fill="none" stroke="white" strokeWidth="0.5" opacity="0.6">
+                  <animate attributeName="rx" values="3;20" dur="1s" fill="freeze" />
+                  <animate attributeName="ry" values="1;6" dur="1s" fill="freeze" />
+                  <animate attributeName="opacity" values="0.6;0" dur="1s" fill="freeze" />
+                </ellipse>
+                <ellipse cx="50" cy="48" rx="10" ry="3" fill="none" stroke="white" strokeWidth="0.5" opacity="0.6">
+                  <animate attributeName="rx" values="3;18" dur="1s" begin="0.3s" fill="freeze" />
+                  <animate attributeName="ry" values="1;5" dur="1s" begin="0.3s" fill="freeze" />
+                  <animate attributeName="opacity" values="0.6;0" dur="1s" begin="0.3s" fill="freeze" />
+                </ellipse>
+              </>
+            )}
+            {/* Bamboo spout */}
+            <line x1="15" y1="30" x2="45" y2="42" stroke="#5A7247" strokeWidth="3" strokeLinecap="round" />
+            <line x1="15" y1="30" x2="15" y2="85" stroke="#5A7247" strokeWidth="3" strokeLinecap="round" />
+            {/* Water drip */}
+            <circle cx="45" cy="44" r="1.5" fill="#7CA8B8" opacity="0.7">
+              <animate attributeName="cy" values="44;48" dur="2s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.7;0" dur="2s" repeatCount="indefinite" />
+            </circle>
+          </svg>
+        </div>
+      );
+    };
+
+    const ZenRocks = ({ left }) => (
+      <div onClick={() => window.playSuikinkutsu()} className="absolute bottom-[16vh] z-[12] cursor-pointer origin-bottom" style={{ left: `${left}%`, width: '92vw', height: '34vw' }}>
+        <svg viewBox="0 0 100 55" overflow="visible" className="watercolor-edge w-full h-full">
+          {/* Soft shadow */}
+          <ellipse cx="50" cy="52" rx="40" ry="4" fill="#00000020" />
+          {/* Large rock - warm grey to match art style */}
+          <ellipse cx="40" cy="42" rx="18" ry="14" fill="#8A8578" />
+          <ellipse cx="40" cy="38" rx="15" ry="10" fill="#9B9488" opacity="0.6" />
+          {/* Medium rock */}
+          <ellipse cx="65" cy="44" rx="14" ry="11" fill="#7A7368" />
+          <ellipse cx="65" cy="41" rx="11" ry="8" fill="#8A8578" opacity="0.5" />
+          {/* Small rock */}
+          <ellipse cx="25" cy="47" rx="9" ry="7" fill="#6E685E" />
+          <ellipse cx="25" cy="45" rx="7" ry="5" fill="#7A7368" opacity="0.5" />
+        </svg>
+      </div>
+    );
+
+    const HangingLanternInner = ({ topPercent = 35 }) => {
+      const [isLit, setIsLit] = useState(false);
+
+      return (
+          <div
+            onClick={(e) => { e.stopPropagation(); window.playSuikinkutsu(); setIsLit(prev => !prev); }}
+            className="absolute cursor-pointer z-[8]"
+            style={{ top: `${topPercent}%`, left: '50%', transform: 'translateX(-50%)', width: '24vw', height: '24vw' }}
+          >
+            <svg viewBox="0 0 80 100" className="w-full h-full" overflow="visible">
+              <line x1="40" y1="0" x2="40" y2="20" stroke="#5C5046" strokeWidth="1.5" />
+              <ellipse cx="40" cy="20" rx="12" ry="4" fill="#5C5046" />
+              <ellipse cx="40" cy="48" rx="20" ry="26" fill={isLit ? '#F5D6A8' : '#E8D5B8'} />
+              <ellipse cx="40" cy="48" rx="17" ry="23" fill={isLit ? '#FAECD4' : '#F0E4D0'} />
+              <ellipse cx="40" cy="74" rx="12" ry="4" fill="#5C5046" />
+              <line x1="40" y1="78" x2="40" y2="92" stroke="#C4453A" strokeWidth="2" />
+              <circle cx="40" cy="94" r="3" fill="#C4453A" />
+              {isLit && (
+                <ellipse cx="40" cy="48" rx="38" ry="40" fill="rgba(255,180,80,0.2)" style={{ filter: 'blur(10px)' }} />
+              )}
+            </svg>
+            {/* Large ambient glow matching stone lanterns - above dark overlay */}
+            {isLit && (
+              <div className="absolute pointer-events-none z-[8]" style={{
+                top: '-200%', left: '-300%', width: '700%', height: '700%',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(255,200,100,0.35) 0%, rgba(255,180,80,0.18) 20%, rgba(255,160,60,0.08) 40%, transparent 65%)',
+                filter: 'blur(25px)',
+              }} />
+            )}
+          </div>
+      );
+    };
+
+    const Fireflies = () => {
+      const flies = React.useMemo(() => Array.from({ length: 14 }).map((_, i) => ({
+        x: rnd(10, 90),
+        y: rnd(20, 70),
+        size: rnd(3, 6),
+        driftX: rnd(-8, 8),
+        driftY: rnd(-6, 6),
+        dur: rnd(3, 6),
+        glowDur: rnd(1.5, 3.5),
+        delay: rnd(0, 4),
+      })), []);
+
+      return (
+        <div className="absolute inset-0 z-[2] pointer-events-none">
+          <style>{`
+            @keyframes fireflyDrift {
+              0%, 100% { transform: translate(0, 0); }
+              25% { transform: translate(var(--dx), var(--dy)); }
+              50% { transform: translate(calc(var(--dx) * -0.5), calc(var(--dy) * 1.2)); }
+              75% { transform: translate(calc(var(--dx) * 0.8), calc(var(--dy) * -0.6)); }
+            }
+            @keyframes fireflyGlow {
+              0%, 100% { opacity: 0.15; }
+              50% { opacity: 0.9; }
+            }
+            @keyframes mistDrift {
+              0% { transform: translateX(0); opacity: 0; }
+              10% { opacity: 1; }
+              90% { opacity: 1; }
+              100% { transform: translateX(180%); opacity: 0; }
+            }
+            @keyframes rainfall {
+              0% { transform: translateY(0); opacity: 0; }
+              5% { opacity: 1; }
+              90% { opacity: 1; }
+              100% { transform: translateY(105vh); opacity: 0; }
+            }
+          `}</style>
+          {flies.map((f, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full"
+              style={{
+                left: `${f.x}%`,
+                top: `${f.y}%`,
+                width: `${f.size}px`,
+                height: `${f.size}px`,
+                '--dx': `${f.driftX}vw`,
+                '--dy': `${f.driftY}vh`,
+                background: 'radial-gradient(circle, #FFEEA0 30%, #FFD54F 60%, transparent 100%)',
+                boxShadow: '0 0 8px 3px rgba(255,238,160,0.4)',
+                animation: `fireflyDrift ${f.dur}s ease-in-out ${f.delay}s infinite, fireflyGlow ${f.glowDur}s ease-in-out ${f.delay}s infinite`,
+              }}
+            />
+          ))}
+        </div>
+      );
+    };
+
+    const SAKURA_BIOMES = ['sakura'];
+
+    const SakuraParticles = ({ visibleBiomes = [] }) => {
+      const hasSakuraTree = visibleBiomes.some(b => SAKURA_BIOMES.includes(b));
+      const [bursts, setBursts] = useState([]);
+
+      sakuraBurstRef.current = (centerX, centerY) => {
+        if (bursts.length > 0) return;
+        const id = Date.now();
+        const petals = Array.from({ length: 15 }).map(() => ({
+          left: centerX + rnd(-5, 5),
+          top: centerY + rnd(-3, 3),
+          size: rnd(8, 14),
+          xDrift: rnd(-80, 80),
+          dur: rnd(6, 12),
+          delay: rnd(0, 2),
+          color: ['#F4CCD2', '#F9DDE1', '#EDAFB8', '#F0C0C8', '#FFD6E0'][Math.floor(rnd(0, 5))],
+        }));
+        setBursts([{ id, petals }]);
+        setTimeout(() => setBursts([]), 14000);
+      };
+
+      return (
+        <>
+          <div className="absolute inset-0 pointer-events-none z-[1] overflow-hidden">
+            {bursts.map(burst => burst.petals.map((p, i) => (
+              <motion.div
+                key={`${burst.id}-${i}`}
+                className="absolute rounded-bl-full rounded-tr-full"
+                style={{ width: p.size, height: p.size, left: `${p.left}vw`, top: `${p.top}vh`, backgroundColor: p.color }}
+                initial={{ opacity: 0.85, y: 0 }}
+                animate={{ y: '80vh', x: [0, p.xDrift, -p.xDrift * 0.5, p.xDrift * 0.3], rotate: [0, 180, 360], opacity: [0.85, 0.7, 0.4, 0] }}
+                transition={{ duration: p.dur, ease: 'linear', delay: p.delay }}
+              />
+            )))}
+          </div>
+          <div className="absolute inset-0 pointer-events-none z-[45] overflow-hidden" style={{ opacity: hasSakuraTree ? 1 : 0, transition: 'opacity 3.5s ease-in-out' }}>
+              {Array.from({length: 80}).map((_, i) => {
+                const color = ['#F4CCD2', '#F9DDE1', '#EDAFB8', '#F0C0C8', '#FFD6E0'][i % 5];
+                const size = rnd(6, 14);
+                const dur = rnd(3, 8);
+                const delay = rnd(0, 6);
+                const xDrift = rnd(-40, 40);
+                return (
+                  <div
+                    key={i}
+                    className="absolute rounded-bl-full rounded-tr-full"
+                    style={{
+                      width: size, height: size,
+                      backgroundColor: color,
+                      left: `${rnd(0, 100)}%`,
+                      top: '-3%',
+                      opacity: rnd(0.5, 0.9),
+                      animation: `sakuraFall ${dur}s linear ${delay}s infinite`,
+                    }}
+                  />
+                );
+              })}
+            </div>
+        </>
+      );
+    };
+
+    const CraneSystem = () => {
+      const [flocks, setFlocks] = useState([]);
+
+      useEffect(() => {
+        const interval = setInterval(() => {
+          setFlocks(prev => [...prev, { id: Date.now(), top: rnd(15, 45), speed: rnd(25, 40), scale: rnd(0.5, 0.8) }]);
+          setFlocks(prev => prev.filter(f => Date.now() - f.id < 45000));
+        }, 15000);
+        return () => clearInterval(interval);
+      }, []);
+
+      const wingVariants = {
+        flap: { rotateX: [0, 60, -20, 0], transition: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' } }
+      };
+
+      return (
+        <div className="absolute inset-0 z-[25] pointer-events-none overflow-hidden">
+          {flocks.map(flock => (
+            <motion.div
+              key={flock.id}
+              className="absolute flex items-center gap-12 cursor-pointer"
+              style={{ pointerEvents: 'auto' }}
+              onClick={() => window.playSuikinkutsu()}
+              initial={{ x: '100vw', y: `${flock.top}vh`, scale: flock.scale }}
+              animate={{ x: '-40vw', y: [`${flock.top}vh`, `${flock.top - 8}vh`, `${flock.top + 4}vh`, `${flock.top - 4}vh`] }}
+              transition={{ x: { duration: flock.speed, ease: 'linear' }, y: { duration: flock.speed, ease: 'easeInOut' } }}
+            >
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="relative w-20 h-20" style={{ marginTop: rnd(-30, 30) }}>
+                  <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.3, ease: "easeInOut" }} className="w-full h-full">
+                    <svg viewBox="0 0 100 100" overflow="visible" className="w-full h-full watercolor-edge" fill="#FFFFFF">
+                      <path d="M10,50 Q40,40 60,50 T95,65" fill="none" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" />
+                      <motion.g variants={wingVariants} animate="flap" transformOrigin="50px 50px">
+                        <path d="M40,50 L20,10 L60,30 Z" fill="#F0F0F0" />
+                        <path d="M40,50 L30,90 L60,70 Z" fill="#DCDCDC" opacity="0.8" />
+                      </motion.g>
+                    </svg>
+                  </motion.div>
+                </div>
+              ))}
+            </motion.div>
+          ))}
+        </div>
+      );
+    };
+
+    const BiomeChunk = React.memo(({ biome, windSpeed }) => {
+      const bambooData = React.useMemo(() => {
+        const count = biome === 'bamboo' ? 30 : 18;
+        const spacing = biome === 'bamboo' ? [2, 5] : [2, 9];
+        const lanternSlots = biome === 'bamboo' ? [3, 8, 13, 18, 23, 28, 33] : [];
+        const positions = [];
+        let x = rnd(8, 15);
+        for (let i = 0; i < count; i++) {
+          positions.push({
+            left: x,
+            height: rnd(80, 130),
+            opacity: parseFloat(rnd(0.8, 1).toFixed(2)),
+            skew: rnd(2, 6),
+            delay: rnd(0, 3),
+            hasLantern: lanternSlots.includes(i),
+            lanternTop: rnd(25, 40),
+            leaves: Array.from({length: Math.floor(rnd(2, 5))}).map(() => {
+              const goRight = Math.random() > 0.5;
+              return {
+                top: rnd(5, 90),
+                rot: goRight ? rnd(-70, -30) : rnd(30, 70),
+                scl: rnd(0.7, 1.6),
+                goRight,
+              };
+            }),
+          });
+          x += rnd(spacing[0], spacing[1]);
+        }
+        return positions;
+      }, []);
+
+      const bgBambooData = React.useMemo(() => {
+        const positions = [];
+        let x = rnd(0, 5);
+        for (let i = 0; i < 30; i++) {
+          positions.push({
+            left: x,
+            height: rnd(140, 200),
+            opacity: parseFloat(rnd(0.45, 0.6).toFixed(2)),
+            delay: rnd(0, 5),
+            leaves: Array.from({length: Math.floor(rnd(3, 6))}).map(() => {
+              const goRight = Math.random() > 0.5;
+              return {
+                top: rnd(5, 85),
+                rot: goRight ? rnd(-70, -30) : rnd(30, 70),
+                scl: rnd(0.6, 1.3),
+                goRight,
+              };
+            }),
+          });
+          x += rnd(1, 4);
+        }
+        return positions;
+      }, []);
+
+      const BgBambooStalks = () => bgBambooData.map((b, i) => (
+        <div
+          key={`bg-${i}`}
+          className="absolute bottom-[6vh] w-5 bg-[#8A8A8A] origin-bottom z-[0]"
+          style={{
+            left: `${b.left}%`, height: `${b.height}%`, opacity: b.opacity,
+            animation: `bambooSway${i % 3} 14s ease-in-out ${b.delay}s infinite`
+          }}
+        >
+          {b.leaves.map((leaf, j) => (
+            <div key={j} className="absolute w-12 h-2 bg-[#8A8A8A] rounded-[50%] -z-10" style={{ top: `${leaf.top}%`, left: '50%', transformOrigin: leaf.goRight ? 'left' : 'right', transform: `translateX(${leaf.goRight ? '0' : '-100%'}) rotate(${leaf.rot}deg) scaleX(${leaf.scl})` }} />
+          ))}
+        </div>
+      ));
+
+      const BambooStalks = () => bambooData.map((b, i) => (
+        <div
+          key={i}
+          className="absolute bottom-[5vh] w-6 origin-bottom z-[1]"
+          style={{
+            left: `${b.left}%`, height: `${b.height}%`, opacity: b.opacity,
+            animation: `bambooSway${i % 3} ${10 / windSpeed}s ease-in-out ${b.delay}s infinite`,
+            overflow: 'visible',
+          }}
+        >
+          {/* Leaves behind stalk */}
+          {b.leaves.map((leaf, j) => (
+            <div key={j} className="absolute w-16 h-3 bg-[#4A5D4E] rounded-[50%]" style={{ zIndex: 0, top: `${leaf.top}%`, left: '50%', transformOrigin: leaf.goRight ? 'left' : 'right', transform: `translateX(${leaf.goRight ? '0' : '-100%'}) rotate(${leaf.rot}deg) scaleX(${leaf.scl})` }} />
+          ))}
+          {/* Stalk on top of leaves */}
+          <div className="absolute inset-0 bg-[#384A3B] rounded-sm" style={{ zIndex: 1 }} />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#4A5D4E] opacity-20" style={{ zIndex: 2 }} />
+          {b.hasLantern && <HangingLanternInner topPercent={b.lanternTop} />}
+        </div>
+      ));
+
+      return (
+        <div className="absolute inset-0" style={{ overflow: 'visible' }}>
+          {/* Background elements clipped to chunk */}
+          <div className="absolute inset-0" style={{ overflow: 'hidden' }}>
+            {biome !== 'snow' && <BgBambooStalks />}
+          </div>
+          {biome !== 'snow' && <BambooStalks />}
+          {biome === 'snow' && (
+            <>
+              {/* Background shadow snow trees - clipped to chunk */}
+              <div className="absolute inset-0" style={{ overflow: 'hidden' }}>
+                {[20, 45, 65].map((x, i) => (
+                  <div key={`bg-snow-tree-${i}`} className="absolute bottom-[12vh] z-[0] pointer-events-none origin-bottom"
+                       style={{ left: `${x}%`, transform: `scaleX(${i % 2 === 0 ? 1 : -1}) scale(${0.7 + (i % 3) * 0.12})`, width: '217vw', height: '266vw', opacity: 0.35, filter: 'grayscale(0.4) brightness(0.6)' }}>
+                    <img src="SnowTree.png" className="w-full h-full object-contain" draggable="false" />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          {getLanternPositions(biome).map(pos => (
+            <StoneLantern key={`lantern-${pos}`} left={pos} />
+          ))}
+          {biome === 'snow' ? <SnowClumps /> : biome === 'shrine' ? null : <TallGrass />}
+          <StoneBase />
+          <WoodBoardwalk />
+          {biome === 'shrine' && (
+            <>
+              <ToriiGate left={15} />
+              <Pagoda left={42} />
+              <Deer left={68} />
+              {/* Sacred mist darkened warm background */}
+              <div className="absolute inset-0 z-[6] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(50,35,20,0.45) 0%, rgba(60,40,25,0.35) 40%, rgba(70,50,30,0.2) 70%, rgba(80,55,30,0.1) 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)', maskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)' }} />
+              {/* Floating mist wisps - watercolor style */}
+              <div className="absolute inset-0 z-[6] pointer-events-none overflow-hidden">
+                {[
+                  { y: 15, delay: 10, dur: 18 },
+                  { y: 35, delay: 0, dur: 20 },
+                  { y: 55, delay: 5, dur: 25 },
+                ].map((m, i) => (
+                  <svg key={i} className="absolute pointer-events-none" style={{
+                    top: `${m.y}%`,
+                    left: '-50%',
+                    width: '80vw',
+                    height: '25vh',
+                    animation: `mistDrift ${m.dur}s linear ${m.delay}s infinite`,
+                    opacity: 0.07,
+                  }} viewBox="-30 -30 160 160" preserveAspectRatio="none">
+                    <defs>
+                      <filter id={`mistBlur${i}`} x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="15" />
+                      </filter>
+                    </defs>
+                    <ellipse cx="50" cy="50" rx="50" ry="25" fill="rgba(245,240,230,0.9)" filter={`url(#mistBlur${i})`} />
+                  </svg>
+                ))}
+              </div>
+            </>
+          )}
+
+          {biome === 'bamboo' && (
+            <>
+              <Tanuki left={50} />
+              {/* Dark atmospheric overlay */}
+              <div className="absolute inset-0 z-[6] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(15,22,15,0.4) 0%, rgba(10,18,10,0.3) 50%, rgba(10,18,10,0.15) 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)', maskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)' }} />
+              {/* Rainfall */}
+              <div className="absolute inset-0 z-[7] pointer-events-none overflow-hidden">
+                {Array.from({ length: 120 }).map((_, i) => {
+                  const x = rnd(0, 100);
+                  const delay = rnd(0, 1.5).toFixed(2);
+                  const dur = rnd(0.35, 0.65).toFixed(2);
+                  return (
+                    <div key={i} className="absolute" style={{
+                      left: `${x}%`,
+                      top: '-3%',
+                      width: '1.5px',
+                      height: '2vh',
+                      background: 'rgba(200,210,225,0.5)',
+                      animation: `rainfall ${dur}s linear ${delay}s infinite`,
+                    }} />
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {biome === 'zen' && (
+            <>
+              {/* Warm golden-hour haze */}
+              <div className="absolute inset-0 z-[6] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(210,175,110,0.25) 0%, rgba(200,165,100,0.18) 50%, rgba(190,160,95,0.1) 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)', maskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)' }} />
+              <Fireflies />
+              {/* Background pine trees - clipped */}
+              <div className="absolute inset-0" style={{ overflow: 'hidden' }}>
+                {[18, 42, 65].map((x, i) => (
+                  <div key={`bg-pine-${i}`} className="absolute bottom-[8vh] z-[0] pointer-events-none origin-bottom"
+                       style={{ left: `${x}%`, transform: `scaleX(${i % 2 === 0 ? 1 : -1}) scale(${0.5 + (i % 3) * 0.1})`, width: '200vw', height: '280vw', opacity: 0.25, filter: 'grayscale(0.3) brightness(0.7)' }}>
+                    <img src="./PineTree.png" className="w-full h-full object-contain" draggable="false" />
+                  </div>
+                ))}
+              </div>
+              {/* Foreground trees and interactive elements - well spaced */}
+              <PineTree left={10} scale={0.9} />
+              <Crane left={25} />
+              <StackingStones left={40} />
+              <WindChime left={52} />
+              <PineTree left={65} scale={0.8} flip={true} />
+              <ZenRocks left={78} />
+            </>
+          )}
+
+          {biome === 'sakura' && (
+            <>
+              <SakuraTree left={12} scale={1.2} />
+              <SakuraTree left={28} scale={1.0} flip={true} />
+              <Bear left={42} />
+              <SakuraTree left={55} scale={1.3} />
+              <SakuraTree left={68} scale={0.9} flip={true} />
+              {/* Soft pink haze overlay */}
+              <div className="absolute inset-0 z-[6] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(220,160,170,0.3) 0%, rgba(230,175,180,0.2) 40%, rgba(240,190,195,0.1) 70%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)', maskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)' }} />
+            </>
+          )}
+
+
+          {biome === 'snow' && (
+            <>
+              <BeechTree left={15} scale={1.1} />
+              <SnowMonkey left={30} />
+              <Snowman left={45} />
+              <SnowMacaque left={58} />
+              <BeechTree left={70} scale={0.85} flip={true} />
+              {/* Twilight purple overlay */}
+              <div className="absolute inset-0 z-[6] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(100,80,140,0.35) 0%, rgba(110,85,150,0.25) 40%, rgba(120,95,155,0.15) 70%, rgba(130,105,160,0.05) 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)', maskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)' }} />
+              {/* Snowflakes */}
+              {Array.from({ length: 120 }).map((_, i) => (
+                <div key={`snow-${i}`} className="absolute rounded-full bg-white pointer-events-none z-[7]"
+                  style={{
+                    left: `${rnd(0, 100)}%`,
+                    top: '-3%',
+                    width: `${rnd(3, 7)}px`,
+                    height: `${rnd(3, 7)}px`,
+                    opacity: rnd(0.4, 0.8),
+                    animation: `snowfall ${rnd(2, 5)}s linear ${rnd(0, 3)}s infinite`,
+                  }}
+                />
+              ))}
+            </>
+          )}
+        </div>
+      );
+    });
+
+    function AndoHomepage() {
+      const windSpeed = 1.0;
+      
+      const [chunks, setChunks] = useState([
+        { id: 1, biome: 'bamboo' },
+        { id: 2, biome: 'shrine' },
+        { id: 3, biome: 'sakura' },
+        { id: 4, biome: 'snow' },
+        { id: 5, biome: 'zen' },
+        { id: 6, biome: 'shrine' },
+      ]);
+      const xOffset = useMotionValue(0);
+      const [visibleBiomes, setVisibleBiomes] = useState([]);
+      const chunksRef = useRef(null);
+
+      useEffect(() => {
+        const initAudio = () => {
+          window.playSuikinkutsu();
+          window.removeEventListener('click', initAudio);
+        };
+        window.addEventListener('click', initAudio);
+        return () => window.removeEventListener('click', initAudio);
+      }, []);
+
+      chunksRef.current = chunks;
+      const frameCountRef = useRef(0);
+
+      useAnimationFrame((t, delta) => {
+        if (panPausedRef.current) return;
+        const moveBy = (110 * delta) / 1000;
+        let currentX = xOffset.get() - moveBy;
+
+        const recycleThreshold = CHUNK_WIDTH + window.innerWidth + 2500;
+        if (Math.abs(currentX) >= recycleThreshold) {
+          currentX += CHUNK_WIDTH;
+          const nextBiome = BIOMES[Math.floor(Math.random() * BIOMES.length)];
+          flushSync(() => {
+            setChunks(prev => [
+              ...prev.slice(1),
+              { id: Date.now(), biome: nextBiome }
+            ]);
+          });
+        }
+        xOffset.set(currentX);
+
+        // Calculate which biomes are actually visible on screen
+        if (chunksRef.current) {
+          const screenW = window.innerWidth;
+          const scrollPos = Math.abs(currentX);
+          const firstVisible = Math.floor(scrollPos / CHUNK_WIDTH);
+          const lastVisible = Math.floor((scrollPos + screenW) / CHUNK_WIDTH);
+          const vb = [];
+          for (let i = firstVisible; i <= lastVisible && i < chunksRef.current.length; i++) {
+            if (chunksRef.current[i]) vb.push(chunksRef.current[i].biome);
+          }
+          setVisibleBiomes(old => {
+            const oldStr = old.sort().join(',');
+            const newStr = vb.sort().join(',');
+            return oldStr === newStr ? old : vb;
+          });
+        }
+      });
+
+      return (
+        <main className="relative w-full h-[100dvh] overflow-hidden bg-[#EEECE4] selection:bg-[#BA3B31]/20 font-serif text-[#1C1F20]">
+          
+          {/* ===== HEADER NAV ===== */}
+          <header className="absolute top-0 left-0 right-0 z-[70] pointer-events-none" style={{ mixBlendMode: 'difference' }}>
+            <div className="flex justify-between items-center px-6 py-5 md:px-12 md:py-8 pointer-events-auto">
+              {/* Logo */}
+              <a href="/" className="relative flex items-center justify-center">
+                <img src="./AndoLogo.png" alt="Ando" className="h-10 w-auto" draggable="false" />
+              </a>
+
+              {/* Right side: ORDER NOW ghost button + brush-stroke hamburger */}
+              <div className="flex items-center gap-4">
+                <a href="#" className="relative inline-flex items-center px-6 py-2 text-white text-xs font-sans font-medium tracking-widest" style={{ letterSpacing: '0.15em' }}>
+                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 120 36" preserveAspectRatio="none">
+                    <rect x="1" y="1" width="118" height="34" rx="1" fill="white" opacity="0.12" />
+                    <rect x="0" y="0" width="120" height="36" rx="1" fill="none" stroke="white" strokeWidth="0.8" opacity="0.35" strokeDasharray="2 3" />
+                  </svg>
+                  <span className="relative">ORDER NOW</span>
+                </a>
+                <button className="w-10 h-10 flex flex-col justify-center items-center gap-[5px] ml-1">
+                  <span className="w-[22px] h-[2.5px] bg-white rounded-full" style={{ borderRadius: '1px 3px 3px 1px' }}></span>
+                  <span className="w-[16px] h-[2.5px] bg-white rounded-full self-end" style={{ borderRadius: '3px 1px 1px 3px' }}></span>
+                  <span className="w-[19px] h-[2.5px] bg-white rounded-full" style={{ borderRadius: '1px 2px 2px 1px' }}></span>
+                </button>
+              </div>
+            </div>
+          </header>
+
+
+
+          {/* DEV: Biome jump buttons */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[90] flex gap-2 pointer-events-auto">
+            {BIOMES.map(b => (
+              <button
+                key={b}
+                onClick={() => {
+                  xOffset.set(0);
+                  setChunks([
+                    { id: Date.now(), biome: b },
+                    { id: Date.now()+1, biome: BIOMES[(BIOMES.indexOf(b)+1)%5] },
+                    { id: Date.now()+2, biome: BIOMES[(BIOMES.indexOf(b)+2)%5] },
+                    { id: Date.now()+3, biome: BIOMES[(BIOMES.indexOf(b)+3)%5] },
+                    { id: Date.now()+4, biome: BIOMES[(BIOMES.indexOf(b)+4)%5] },
+                  ]);
+                }}
+                className="px-3 py-1 bg-black/50 text-white text-xs rounded backdrop-blur-sm hover:bg-black/70 transition-colors capitalize"
+              >{b}</button>
+            ))}
+          </div>
+
+          <div className="absolute inset-0 z-10 flex">
+
+            {/* Sky gradient */}
+            <div className="absolute inset-0 pointer-events-none z-[0]" style={{ background: 'linear-gradient(to bottom, #C8D5DC 0%, #D4DADE 20%, #DDE2DF 40%, #E4E1D8 70%)' }} />
+
+            {/* Sun/moon glow */}
+            <div className="absolute top-[15%] right-[25%] w-[8vw] h-[8vw] rounded-full bg-[#FFFFFF] opacity-80 pointer-events-none z-[1]" style={{ filter: 'blur(4px)' }} />
+
+            {/* Soft clouds */}
+            <div className="absolute top-[8%] left-[10%] w-[20vw] h-[6vh] rounded-full bg-white opacity-25 pointer-events-none z-[1]" style={{ filter: 'blur(20px)' }} />
+            <div className="absolute top-[12%] left-[55%] w-[15vw] h-[5vh] rounded-full bg-white opacity-20 pointer-events-none z-[1]" style={{ filter: 'blur(18px)' }} />
+            <div className="absolute top-[6%] right-[15%] w-[12vw] h-[4vh] rounded-full bg-white opacity-15 pointer-events-none z-[1]" style={{ filter: 'blur(22px)' }} />
+
+            {/* Very distant mountain layer (slowest) */}
+            <div
+              className="absolute inset-y-0 left-0 w-[200%] flex items-end pointer-events-none opacity-30 z-[0] will-change-transform"
+              style={{ animation: 'mountainScroll1 600s linear infinite' }}
+            >
+              <svg viewBox="0 0 1000 300" preserveAspectRatio="none" className="w-full h-[68vh] fill-[#C0CAD0]">
+                <path d="M0,300 L0,200 Q50,160 100,190 Q200,100 300,170 Q400,130 450,80 Q500,130 550,160 Q650,100 750,150 Q850,90 900,140 Q950,170 1000,200 L1000,300 Z" />
+              </svg>
+            </div>
+
+            {/* Far mountains with tree silhouette ridge */}
+            <div
+              className="absolute inset-y-0 left-0 w-[200%] flex items-end pointer-events-none opacity-50 z-[1] will-change-transform"
+              style={{ animation: 'mountainScroll1 400s linear infinite' }}
+            >
+              <svg viewBox="0 0 1000 300" preserveAspectRatio="none" className="w-full h-[60vh] fill-[#B5C2C9]">
+                <path d="M0,300 L0,180 L80,220 L150,120 L270,190 L380,80 L500,180 L580,220 L650,120 L770,190 L880,80 L1000,180 L1000,300 Z" />
+              </svg>
+            </div>
+
+            {/* Mid mountains */}
+            <div
+              className="absolute inset-y-0 left-0 w-[200%] flex items-end pointer-events-none opacity-70 z-[1] will-change-transform"
+              style={{ animation: 'mountainScroll2 280s linear infinite' }}
+            >
+              <svg viewBox="0 0 1000 300" preserveAspectRatio="none" className="w-full h-[48vh] fill-[#8A9BA3]">
+                <path d="M0,300 L0,220 L60,180 L120,240 L280,100 L400,160 L500,220 L560,180 L620,240 L780,100 L900,160 L1000,220 L1000,300 Z" />
+              </svg>
+            </div>
+
+            {/* Near mountains (closest, most detailed) */}
+            <div
+              className="absolute inset-y-0 left-0 w-[200%] flex items-end pointer-events-none opacity-90 z-[2] will-change-transform"
+              style={{ animation: 'mountainScroll3 180s linear infinite' }}
+            >
+              <svg viewBox="0 0 1000 300" preserveAspectRatio="none" className="w-full h-[38vh] fill-[#5B717B]">
+                <path d="M0,300 L0,230 Q20,210 30,220 Q50,150 70,200 Q100,220 120,180 Q150,150 180,210 Q250,160 300,230 Q350,210 370,180 Q400,160 430,220 L500,230 Q520,210 530,220 Q550,150 570,200 Q600,220 620,180 Q650,150 680,210 Q750,160 800,230 Q850,210 870,180 Q900,160 930,220 L1000,230 L1000,300 Z" />
+              </svg>
+            </div>
+
+            <div className="mist-layer" />
+
+            <GroundPlane />
+
+            <motion.div 
+              className="absolute inset-y-0 left-0 flex items-end will-change-transform z-[10]"
+              style={{ x: xOffset }}
+            >
+              {chunks.map((chunk) => (
+                <div key={chunk.id} className="h-full flex-shrink-0" style={{ position: 'relative', overflow: 'visible', width: `${CHUNK_WIDTH}px` }}>
+                  <BiomeChunk biome={chunk.biome} windSpeed={windSpeed} />
+                </div>
+              ))}
+            </motion.div>
+
+            <ShibaDog />
+            <SakuraParticles visibleBiomes={visibleBiomes} />
+
+            {/* Global biome atmosphere overlays - always rendered, opacity transitions */}
+            {/* Sacred mist - floating wisps instead of full overlay */}
+            <div className="absolute inset-0 z-[46] pointer-events-none overflow-hidden" style={{ opacity: visibleBiomes.includes('shrine') ? 1 : 0, transition: 'opacity 3.5s ease-in-out' }}>
+              {[
+                { y: 25, delay: 0, dur: 20 },
+                { y: 50, delay: 5, dur: 25 },
+                { y: 70, delay: 10, dur: 18 },
+              ].map((m, i) => (
+                <svg key={i} className="absolute pointer-events-none" style={{
+                  top: `${m.y}%`,
+                  left: '-50%',
+                  width: '80vw',
+                  height: '25vh',
+                  animation: `mistDrift ${m.dur}s linear ${m.delay}s infinite`,
+                  opacity: 0.07,
+                }} viewBox="-30 -30 160 160" preserveAspectRatio="none">
+                  <defs>
+                    <filter id={`gmist${i}`} x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur stdDeviation="15" />
+                    </filter>
+                  </defs>
+                  <ellipse cx="50" cy="50" rx="50" ry="25" fill="rgba(245,240,230,0.9)" filter={`url(#gmist${i})`} />
+                </svg>
+              ))}
+            </div>
+            <div className="absolute inset-0 z-[46] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(15,22,15,0.4) 0%, rgba(10,18,10,0.3) 50%, rgba(10,18,10,0.15) 100%)', opacity: visibleBiomes.includes('bamboo') ? 1 : 0, transition: 'opacity 3.5s ease-in-out' }} />
+            <div className="absolute inset-0 z-[46] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(210,185,140,0.25) 0%, rgba(220,195,150,0.15) 50%, transparent 100%)', opacity: visibleBiomes.includes('zen') ? 1 : 0, transition: 'opacity 3.5s ease-in-out' }} />
+            <div className="absolute inset-0 z-[46] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(220,160,170,0.3) 0%, rgba(230,175,180,0.2) 40%, rgba(240,190,195,0.1) 70%, transparent 100%)', opacity: visibleBiomes.includes('sakura') ? 1 : 0, transition: 'opacity 3.5s ease-in-out' }} />
+            <div className="absolute inset-0 z-[46] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(100,80,140,0.35) 0%, rgba(110,85,150,0.25) 40%, rgba(120,95,155,0.15) 70%, transparent 100%)', opacity: visibleBiomes.includes('snow') ? 1 : 0, transition: 'opacity 3.5s ease-in-out' }} />
+
+          </div>
+
+          <div className="paper-texture" />
+          
+        </main>
+      );
+    }
+
+    const root = createRoot(document.getElementById('root'));
+    root.render(<AndoHomepage />);
+  </script>
+</body>
+</html>
