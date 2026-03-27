@@ -919,7 +919,7 @@
     };
 
     const BIOME_OCCUPIED = {
-      shrine: [15, 25, 42, 52, 68],
+      shrine: [5, 8, 10, 12, 15, 18, 20, 25, 30, 35, 38, 40, 42, 45, 48, 50, 55, 60, 65, 68, 70, 72, 75, 78, 80],
       bamboo: [45, 50, 55],
       zen: [10, 20, 25, 35, 40, 50, 52, 62, 65, 75, 78],
       sakura: [12, 22, 28, 38, 42, 52, 55, 65, 68],
@@ -1394,7 +1394,8 @@
       // Randomized element layouts per chunk — each chunk instance gets unique positions
       // Uses a slot-based approach: divide the chunk into zones and place elements randomly within each zone
       const shrineLayout = React.useMemo(() => {
-        const slots = [rnd(10, 25), rnd(33, 52), rnd(58, 78)];
+        // Wider spacing: 3 distinct zones with large gaps to prevent overlap
+        const slots = [rnd(5, 15), rnd(38, 48), rnd(70, 80)];
         // Shuffle order so torii/pagoda/deer don't always appear left-to-right in same order
         const shuffled = slots.sort(() => Math.random() - 0.5);
         return { torii: shuffled[0], pagoda: shuffled[1], deer: shuffled[2] };
