@@ -294,7 +294,7 @@
     };
 
     const GroundPlane = () => (
-      <div className="absolute bottom-0 w-full h-[28vh] z-[1]" />
+      <div className="absolute bottom-0 w-full h-[21vh] z-[1]" />
     );
 
     const WoodBoardwalk = () => (
@@ -351,7 +351,7 @@
     );
 
     const StoneBase = () => (
-      <div className="absolute bottom-0 w-full h-[28vh] z-[4] pointer-events-none drop-shadow-2xl">
+      <div className="absolute bottom-0 w-full h-[21vh] z-[4] pointer-events-none drop-shadow-2xl">
         <svg viewBox="0 0 2600 100" preserveAspectRatio="none" className="w-full h-full">
            <rect width="2600" height="100" fill="#4B4B4B" />
            {/* Evenly spaced vertical lines that tile seamlessly between chunks */}
@@ -627,7 +627,7 @@
       };
       return (
         <div
-          className="absolute bottom-[16vh] z-[2] origin-bottom drop-shadow-2xl pointer-events-none"
+          className="absolute bottom-[12vh] z-[2] origin-bottom drop-shadow-2xl pointer-events-none"
           style={{
             width: '200vw', height: '280vw', left: `${left}%`,
             transform: `scaleX(${flip ? -1 : 1}) scale(${scale})`,
@@ -1829,7 +1829,7 @@
       const phaseDuration = phase === 'inhale' ? 4 : phase === 'hold' ? 0.1 : 8;
 
       return (
-        <div className="fixed top-[18vh] left-1/2 -translate-x-1/2 z-[95] flex flex-col items-center pointer-events-none">
+        <div className="fixed top-[10vh] left-1/2 -translate-x-1/2 z-[95] flex flex-col items-center pointer-events-none">
           <motion.div
             animate={{ scale: blobScale }}
             transition={{ duration: phaseDuration, ease: [0.4, 0, 0.2, 1] }}
@@ -2192,7 +2192,7 @@
                   }}
                   title={mood.label}
                 >
-                  <span className="flex-shrink-0 transition-all duration-500 scale-[0.6]" style={{ color: intentionHint ? 'rgba(45,42,38,1)' : isActive ? 'rgba(45,42,38,1)' : 'rgba(45,42,38,0.75)' }}>
+                  <span className="flex-shrink-0 transition-all duration-500 scale-[0.6]" style={{ color: intentionHint ? 'rgba(255,255,255,1)' : isActive ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.7)' }}>
                     {MOOD_BRUSHSTROKES[key]}
                   </span>
                   {/* Tooltip on hover */}
@@ -2202,7 +2202,7 @@
                       backdropFilter: 'blur(12px)',
                       WebkitBackdropFilter: 'blur(12px)',
                       border: '1px solid rgba(255,255,255,0.18)',
-                      color: 'rgba(61,50,46,0.55)',
+                      color: 'rgba(255,255,255,0.75)',
                       letterSpacing: '0.08em',
                     }}
                   >
@@ -2217,9 +2217,9 @@
 
           {/* ===== BOTTOM NAV ===== */}
           <footer className="absolute bottom-0 left-0 right-0 z-[70] pointer-events-none flex justify-center" style={{ opacity: headerOpacity, transition: 'opacity 5s ease' }}>
-            <nav ref={navRef} className="nav-pill relative mb-4 md:mb-6 pointer-events-auto flex items-center rounded-full px-1.5 py-1.5"
+            <nav ref={navRef} className="nav-pill relative mb-4 md:mb-6 pointer-events-auto flex items-center rounded-full p-1.5"
               style={{
-                background: 'rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.25)',
                 backdropFilter: 'blur(15px)',
                 WebkitBackdropFilter: 'blur(15px)',
                 border: '1px solid rgba(180,190,175,0.35)',
@@ -2266,16 +2266,16 @@
                   key={tab.id}
                   data-tab={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className="relative z-10 flex items-center gap-1.5 px-3.5 md:px-5 py-2 rounded-full transition-colors duration-500 font-sans whitespace-nowrap"
+                  className="relative z-10 flex items-center gap-1.5 px-4 md:px-5 py-3 rounded-full transition-colors duration-500 font-sans whitespace-nowrap"
                   style={{
-                    color: activeTab === tab.id ? 'rgba(45,42,38,0.9)' : 'rgba(45,42,38,0.45)',
+                    color: activeTab === tab.id ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.5)',
                     fontSize: '11px',
                     fontWeight: activeTab === tab.id ? 500 : 400,
                     letterSpacing: '0.25em',
                     textTransform: 'uppercase',
                   }}
                 >
-                  <span style={{ opacity: activeTab === tab.id ? 0.85 : 0.4, transition: 'opacity 0.5s' }}>{tab.icon}</span>
+                  <span style={{ opacity: activeTab === tab.id ? 0.95 : 0.55, transition: 'opacity 0.5s' }}>{tab.icon}</span>
                   <span>{tab.label}</span>
                 </button>
               ))}
