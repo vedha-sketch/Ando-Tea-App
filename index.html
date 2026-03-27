@@ -294,12 +294,12 @@
     };
 
     const GroundPlane = () => (
-      <div className="absolute bottom-[-5px] w-full h-[20vh] z-[1]" />
+      <div className="absolute bottom-[7vh] w-full h-[20vh] z-[1]" />
     );
 
     const WoodBoardwalk = () => (
       <>
-        <div className="absolute bottom-[-3vh] w-full h-[20vh] z-[5] pointer-events-none drop-shadow-2xl">
+        <div className="absolute bottom-[5vh] w-full h-[20vh] z-[5] pointer-events-none drop-shadow-2xl">
           <svg viewBox="0 0 2600 100" preserveAspectRatio="none" className="w-full h-full">
              {/* Soft shadow below boardwalk */}
              <rect x="0" y="28" width="2600" height="4" fill="black" opacity="0.15" rx="2" />
@@ -319,7 +319,7 @@
     );
 
     const TallGrass = () => (
-      <div className="absolute bottom-[14vh] w-full h-[15vh] z-[4] pointer-events-none">
+      <div className="absolute bottom-[22vh] w-full h-[15vh] z-[4] pointer-events-none">
         <svg viewBox="0 0 2600 200" preserveAspectRatio="none" className="w-full h-full">
           <style>{`
             @keyframes grassSway {
@@ -351,7 +351,7 @@
     );
 
     const StoneBase = () => (
-      <div className="absolute bottom-[-3vh] w-full h-[20vh] z-[4] pointer-events-none drop-shadow-2xl">
+      <div className="absolute bottom-[5vh] w-full h-[20vh] z-[4] pointer-events-none drop-shadow-2xl">
         <svg viewBox="0 0 2600 100" preserveAspectRatio="none" className="w-full h-full">
            <rect width="2600" height="100" fill="#4B4B4B" />
            {/* Evenly spaced vertical lines that tile seamlessly between chunks */}
@@ -393,7 +393,7 @@
       return (
         <div
           className="absolute z-[3] origin-bottom pointer-events-none"
-          style={{ bottom: '14vh', left: `${left}%`, width: '140vw', height: '140vw' }}
+          style={{ bottom: '22vh', left: `${left}%`, width: '140vw', height: '140vw' }}
         >
           <img
             src={forward ? './BearForward.png' : './BearRight.png'}
@@ -417,7 +417,7 @@
       return (
         <div
           className="absolute z-[3] origin-bottom pointer-events-none"
-          style={{ bottom: '1vh', left: `${left}%`, width: '106vw', height: '106vw' }}
+          style={{ bottom: '9vh', left: `${left}%`, width: '106vw', height: '106vw' }}
         >
           <img
             src={isBowing ? './deer_new_1.png' : './deer_new_2.png'}
@@ -439,7 +439,7 @@
       return (
         <div
           className="absolute z-[3] origin-bottom"
-          style={{ bottom: '13vh', left: `${left}%`, width: '70vw' }}
+          style={{ bottom: '21vh', left: `${left}%`, width: '70vw' }}
         >
           {/* Tanuki on top of rock */}
           <div
@@ -522,7 +522,7 @@
       return (
         <div
           className="absolute z-[45] origin-bottom drop-shadow-2xl pointer-events-none"
-          style={{ left: '50%', transform: 'translateX(-50%)', width: '53vw', height: '36vw', bottom: '-4vh' }}
+          style={{ left: '50%', transform: 'translateX(-50%)', width: '53vw', height: '36vw', bottom: '4vh' }}
         >
           <div onClick={handleClick} className="absolute cursor-pointer" style={{ pointerEvents: 'auto', left: '30%', top: '0%', width: '40%', height: '70%', zIndex: 10 }} />
           <img
@@ -544,7 +544,7 @@
 
       return (
         <div
-          className="absolute bottom-[12vh] z-[3] origin-bottom transition-all drop-shadow-2xl pointer-events-none"
+          className="absolute bottom-[20vh] z-[3] origin-bottom transition-all drop-shadow-2xl pointer-events-none"
           style={{ left: `${left}%`, width: '140vw', height: '140vw' }}
         >
           <img
@@ -574,7 +574,7 @@
       };
       return (
         <div
-          className="absolute bottom-[14vh] z-[2] origin-bottom drop-shadow-2xl pointer-events-none"
+          className="absolute bottom-[22vh] z-[2] origin-bottom drop-shadow-2xl pointer-events-none"
           style={{ left: `${left}%`, width: '217vw', height: '242vw' }}
         >
           <img
@@ -627,7 +627,7 @@
       };
       return (
         <div
-          className="absolute bottom-[0vh] z-[2] origin-bottom drop-shadow-2xl pointer-events-none"
+          className="absolute bottom-[16vh] z-[2] origin-bottom drop-shadow-2xl pointer-events-none"
           style={{
             width: '200vw', height: '280vw', left: `${left}%`,
             transform: `scaleX(${flip ? -1 : 1}) scale(${scale})`,
@@ -662,7 +662,7 @@
     };
 
     const SnowClumps = () => (
-      <div className="absolute bottom-[16vh] w-full h-[15vh] z-[4] pointer-events-none" style={{ WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)', maskImage: 'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)' }}>
+      <div className="absolute bottom-[24vh] w-full h-[15vh] z-[4] pointer-events-none" style={{ WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)', maskImage: 'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)' }}>
         <svg viewBox="0 0 2600 200" preserveAspectRatio="none" className="w-full h-full">
           {Array.from({ length: 60 }).map((_, i) => {
             const x = i * 45 + rnd(-15, 15);
@@ -692,7 +692,7 @@
         }
       };
       return (
-        <div className="absolute bottom-[12vh] z-[2] drop-shadow-2xl origin-bottom pointer-events-none"
+        <div className="absolute bottom-[20vh] z-[2] drop-shadow-2xl origin-bottom pointer-events-none"
              style={{ left: `${left}%`, transform: `scaleX(${flip ? -1 : 1}) scale(${scale})`, width: '217vw', height: '266vw' }}>
           <div ref={shakeRef} className="w-full h-full origin-bottom">
             <img src="SnowTree.png" alt="Snow Tree" className="w-full h-full object-contain" draggable="false" />
@@ -706,7 +706,7 @@
       const [showBaby, setShowBaby] = useState(false);
       return (
         <div
-          className="absolute bottom-[12vh] z-[3] drop-shadow-2xl origin-bottom pointer-events-none"
+          className="absolute bottom-[20vh] z-[3] drop-shadow-2xl origin-bottom pointer-events-none"
           style={{ left: `${left}%`, width: '217vw', height: '266vw' }}
         >
           <img
@@ -726,7 +726,7 @@
       return (
         <div
           onClick={(e) => { e.stopPropagation(); window.playSuikinkutsu(); setStanding(prev => !prev); }}
-          className="absolute bottom-[14vh] z-[3] cursor-pointer drop-shadow-xl origin-bottom"
+          className="absolute bottom-[22vh] z-[3] cursor-pointer drop-shadow-xl origin-bottom"
           style={{ left: `${left}%`, width: '85vw', height: '85vw' }}
         >
           <img
@@ -743,7 +743,7 @@
       return (
         <div
           onClick={(e) => { e.stopPropagation(); window.playSuikinkutsu(); setToppled(prev => !prev); }}
-          className="absolute bottom-[12vh] z-[3] cursor-pointer drop-shadow-xl origin-bottom"
+          className="absolute bottom-[20vh] z-[3] cursor-pointer drop-shadow-xl origin-bottom"
           style={{ left: `${left}%`, width: '68vw', height: '111vw' }}
         >
           <svg viewBox="0 0 100 180" className="w-full h-full">
@@ -793,7 +793,7 @@
       return (
         <div
           onClick={handleTap}
-          className="absolute bottom-[4vh] z-[3] cursor-pointer origin-bottom"
+          className="absolute bottom-[12vh] z-[3] cursor-pointer origin-bottom"
           style={{ left: `${left}%`, width: '30vw', height: '36vh' }}
         >
           <svg viewBox="0 0 80 120" className="w-full h-full" overflow="visible">
@@ -842,7 +842,7 @@
       return (
         <div
           onClick={(e) => { e.stopPropagation(); window.playSuikinkutsu(); setFrame(prev => (prev + 1) % MONKEY_FRAMES.length); }}
-          className="absolute bottom-[14vh] z-[3] cursor-pointer drop-shadow-xl origin-bottom"
+          className="absolute bottom-[22vh] z-[3] cursor-pointer drop-shadow-xl origin-bottom"
           style={{ left: `${left}%`, width: '85vw', height: '85vw' }}
         >
           <img
@@ -872,7 +872,7 @@
 
       return (
         <div
-          className="absolute bottom-[-8vh] z-[2] origin-bottom pointer-events-none drop-shadow-2xl"
+          className="absolute bottom-[0vh] z-[2] origin-bottom pointer-events-none drop-shadow-2xl"
           style={{ width: '181vw', height: '205vw', left: `${left}%`, transform: `scaleX(${flip ? -1 : 1}) scale(${scale})` }}>
           <div ref={shakeRef} className="w-full h-full origin-bottom">
             <img
@@ -891,7 +891,7 @@
 
       return (
           <div
-            className="absolute bottom-[8vh] z-[4] origin-bottom drop-shadow-xl pointer-events-none"
+            className="absolute bottom-[16vh] z-[4] origin-bottom drop-shadow-xl pointer-events-none"
             style={{ left: `${left}%`, width: '60vw', height: '85vw' }}
           >
             <div className="relative w-full h-full">
@@ -947,7 +947,7 @@
       return (
         <div
           onClick={handleTap}
-          className="absolute bottom-[5vh] z-[3] cursor-pointer"
+          className="absolute bottom-[13vh] z-[3] cursor-pointer"
           style={{ left: `${left}%`, width: '30vw', height: '55vh' }}
         >
           <svg viewBox="0 0 100 240" className="w-full h-full" overflow="visible">
@@ -992,7 +992,7 @@
       return (
         <div
           onClick={handleTap}
-          className="absolute bottom-[16vh] z-[3] cursor-pointer origin-bottom"
+          className="absolute bottom-[24vh] z-[3] cursor-pointer origin-bottom"
           style={{ left: `${left}%`, width: '45vw', height: '45vw' }}
         >
           <svg viewBox="0 0 100 100" className="w-full h-full" overflow="visible">
@@ -1033,7 +1033,7 @@
     };
 
     const ZenRocks = ({ left }) => (
-      <div className="absolute bottom-[16vh] z-[12] origin-bottom pointer-events-none" style={{ left: `${left}%`, width: '92vw', height: '34vw' }}>
+      <div className="absolute bottom-[24vh] z-[12] origin-bottom pointer-events-none" style={{ left: `${left}%`, width: '92vw', height: '34vw' }}>
         <div onClick={(e) => { e.stopPropagation(); window.playSuikinkutsu(); }} className="absolute cursor-pointer" style={{ pointerEvents: 'auto', left: '15%', top: '30%', width: '70%', height: '60%' }} />
         <svg viewBox="0 0 100 55" overflow="visible" className="watercolor-edge w-full h-full">
           {/* Soft shadow */}
@@ -1442,7 +1442,7 @@
       const BgBambooStalks = () => bgBambooData.map((b, i) => (
         <div
           key={`bg-${i}`}
-          className="absolute bottom-[6vh] w-5 bg-[#8A8A8A] origin-bottom z-[0]"
+          className="absolute bottom-[14vh] w-5 bg-[#8A8A8A] origin-bottom z-[0]"
           style={{
             left: `${b.left}%`, height: `${b.height}%`, opacity: b.opacity,
             animation: `bambooSway${i % 3} 14s ease-in-out ${b.delay}s infinite`
@@ -1457,7 +1457,7 @@
       const BambooStalks = () => bambooData.map((b, i) => (
         <div
           key={i}
-          className="absolute bottom-[5vh] w-6 origin-bottom z-[1]"
+          className="absolute bottom-[13vh] w-6 origin-bottom z-[1]"
           style={{
             left: `${b.left}%`, height: `${b.height}%`, opacity: b.opacity,
             animation: `bambooSway${i % 3} ${10 / windSpeed}s ease-in-out ${b.delay}s infinite`,
@@ -1487,7 +1487,7 @@
               {/* Background shadow snow trees - clipped to chunk */}
               <div className="absolute inset-0" style={{ overflow: 'hidden' }}>
                 {snowLayout.bgTrees.map((x, i) => (
-                  <div key={`bg-snow-tree-${i}`} className="absolute bottom-[12vh] z-[0] pointer-events-none origin-bottom"
+                  <div key={`bg-snow-tree-${i}`} className="absolute bottom-[20vh] z-[0] pointer-events-none origin-bottom"
                        style={{ left: `${x}%`, transform: `scaleX(${i % 2 === 0 ? 1 : -1}) scale(${0.65 + Math.random() * 0.2})`, width: '217vw', height: '266vw', opacity: 0.35, filter: 'grayscale(0.4) brightness(0.6)' }}>
                     <img src="SnowTree.png" className="w-full h-full object-contain" draggable="false" />
                   </div>
@@ -1545,7 +1545,7 @@
               {/* Background pine trees - clipped */}
               <div className="absolute inset-0" style={{ overflow: 'hidden' }}>
                 {zenLayout.bgPines.map((x, i) => (
-                  <div key={`bg-pine-${i}`} className="absolute bottom-[8vh] z-[0] pointer-events-none origin-bottom"
+                  <div key={`bg-pine-${i}`} className="absolute bottom-[16vh] z-[0] pointer-events-none origin-bottom"
                        style={{ left: `${x}%`, transform: `scaleX(${i % 2 === 0 ? 1 : -1}) scale(${0.45 + Math.random() * 0.2})`, width: '200vw', height: '280vw', opacity: 0.25, filter: 'grayscale(0.3) brightness(0.7)' }}>
                     <img src="./PineTree.png" className="w-full h-full object-contain" draggable="false" />
                   </div>
@@ -2215,9 +2215,9 @@
 
           {/* intentionHint glow is handled inline on the buttons + breathing area */}
 
-          {/* ===== HEADER NAV ===== */}
-          <header className="absolute top-0 left-0 right-0 z-[70] pointer-events-none flex justify-center" style={{ opacity: headerOpacity, transition: 'opacity 5s ease' }}>
-            <nav ref={navRef} className="nav-pill relative mt-4 md:mt-6 pointer-events-auto flex items-center rounded-full px-1.5 py-1.5"
+          {/* ===== BOTTOM NAV ===== */}
+          <footer className="absolute bottom-0 left-0 right-0 z-[70] pointer-events-none flex justify-center" style={{ opacity: headerOpacity, transition: 'opacity 5s ease' }}>
+            <nav ref={navRef} className="nav-pill relative mb-4 md:mb-6 pointer-events-auto flex items-center rounded-full px-1.5 py-1.5"
               style={{
                 background: 'rgba(255,255,255,0.15)',
                 backdropFilter: 'blur(15px)',
@@ -2280,7 +2280,7 @@
                 </button>
               ))}
             </nav>
-          </header>
+          </footer>
 
 
 
@@ -2309,7 +2309,7 @@
           {/* Dev toggle button — bottom right */}
           <button
             onClick={() => setShowDev(d => !d)}
-            className="fixed bottom-3 right-3 z-[99] w-6 h-6 rounded-full flex items-center justify-center pointer-events-auto transition-all duration-300"
+            className="fixed bottom-14 right-3 z-[99] w-6 h-6 rounded-full flex items-center justify-center pointer-events-auto transition-all duration-300"
             style={{ background: showDev ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.12)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.1)' }}
             title={showDev ? 'Hide dev tools' : 'Show dev tools'}
           >
