@@ -288,6 +288,7 @@
       uiOpacity: 1.0,
       biomeBias: null,
       detectedMood: 'curious',
+      currentBiome: null,
       dwellTimes: [],  // time between taps
       lastTapTime: 0,
     };
@@ -488,7 +489,9 @@
         const loop = (time) => {
           if (cancelled) return;
           // Scale frame interval inversely with scroll speed (faster scroll = faster walk)
-          const speed = behaviorState.adaptiveSpeed || 1;
+          let speed = behaviorState.adaptiveSpeed || 1;
+          // Boost dog walk speed in zen biome so it doesn't feel too sluggish
+          if (behaviorState.currentBiome === 'zen') speed = Math.max(speed, 0.9);
           const frameInterval = Math.max(65, 120 / speed);
           if (walkingRef.current && time - lastFrameTime.current > frameInterval) {
             lastFrameTime.current = time;
@@ -2163,6 +2166,7 @@
           setVisibleBiomes(old => {
             const oldStr = old.sort().join(',');
             const newStr = vb.sort().join(',');
+            if (vb.length > 0) behaviorState.currentBiome = vb[0];
             return oldStr === newStr ? old : vb;
           });
         }
