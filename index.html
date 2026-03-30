@@ -923,7 +923,7 @@
       bamboo: [45, 50, 55],
       zen: [10, 20, 25, 35, 40, 50, 52, 62, 65, 75, 78],
       sakura: [12, 22, 28, 38, 42, 52, 55, 65, 68],
-      snow: [15, 45, 70],
+      snow: [10, 15, 18, 22, 25, 28, 32, 35, 38, 40, 45, 48, 52, 55, 58, 62, 65, 68, 72, 75, 78, 80],
     };
 
     const getLanternPositions = (biome) => {
@@ -2062,8 +2062,10 @@
       const [showDev, setShowDev] = useState(false);
       const [activeTab, setActiveTab] = useState('meditation');
       const [intentionHint, setIntentionHint] = useState(true);
+      const [showMoodButtons, setShowMoodButtons] = useState(true);
       const navRef = useRef(null);
       const [pillStyle, setPillStyle] = useState({ left: 0, width: 0 });
+      const [medBtnOffset, setMedBtnOffset] = useState(0); // px offset from footer center to meditation btn center
       const [chunks, setChunks] = useState(() => {
         const startBiome = MOOD_MAP.explore.biome;
         const now = Date.now();
@@ -2086,10 +2088,24 @@
           width: btnRect.width,
           height: btnRect.height,
         });
+        // Track meditation button offset from footer center for arc positioning
+        const medBtn = nav.querySelector('[data-tab="meditation"]');
+        if (medBtn) {
+          const medRect = medBtn.getBoundingClientRect();
+          const medCenterX = medRect.left + medRect.width / 2;
+          const footerEl = nav.parentElement;
+          if (footerEl) {
+            const footerRect = footerEl.getBoundingClientRect();
+            const footerCenterX = footerRect.left + footerRect.width / 2;
+            setMedBtnOffset(medCenterX - footerCenterX);
+          }
+        }
       }, [activeTab]);
 
       const handleMoodSelect = (mood) => {
         setIntentionHint(false);
+        // Hide mood buttons after a brief moment
+        setTimeout(() => setShowMoodButtons(false), 1200);
         const config = MOOD_MAP[mood];
         moodSpeedRef.current = config.speed;
         setScrollSpeed(config.speed);
@@ -2174,49 +2190,94 @@
       return (
         <main className="relative w-full h-[100dvh] overflow-hidden bg-[#EEECE4] selection:bg-[#BA3B31]/20 font-serif text-[#1C1F20]">
 
-          {/* ===== MOOD BUTTONS — right side, below intention message ===== */}
-          <div className="fixed right-4 top-[18vh] z-[75] flex flex-col gap-2.5 pointer-events-auto" style={{ marginTop: intentionHint ? '60px' : '0', transition: 'margin-top 0.5s ease' }}>
-            {Object.entries(MOOD_MAP).map(([key, mood]) => {
-              const isActive = initialMood === key;
-              return (
-                <button
-                  key={key}
-                  onClick={() => handleMoodSelect(key)}
-                  className={`group relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-500 cursor-pointer ${intentionHint ? 'intention-glow' : ''}`}
-                  style={{
-                    background: intentionHint ? 'rgba(255,255,255,0.25)' : isActive ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.15)',
-                    backdropFilter: 'blur(15px)',
-                    WebkitBackdropFilter: 'blur(15px)',
-                    border: `1px solid ${intentionHint ? 'rgba(255,255,255,0.5)' : 'rgba(180,190,175,0.35)'}`,
-                    boxShadow: intentionHint ? undefined : '0 2px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.15)',
-                  }}
-                  title={mood.label}
-                >
-                  <span className="flex-shrink-0 transition-all duration-500 scale-[0.6]" style={{ color: intentionHint ? 'rgba(255,255,255,1)' : isActive ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.7)' }}>
-                    {MOOD_BRUSHSTROKES[key]}
-                  </span>
-                  {/* Tooltip on hover */}
-                  <span className="absolute right-full mr-2.5 px-2.5 py-1 rounded-full whitespace-nowrap font-cormorant text-[11px] pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0 translate-x-1"
-                    style={{
-                      background: 'rgba(255,255,255,0.2)',
-                      backdropFilter: 'blur(12px)',
-                      WebkitBackdropFilter: 'blur(12px)',
-                      border: '1px solid rgba(255,255,255,0.18)',
-                      color: 'rgba(255,255,255,0.75)',
-                      letterSpacing: '0.08em',
-                    }}
-                  >
-                    {mood.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          {/* Mood buttons are now inside the footer below */}
 
           {/* intentionHint glow is handled inline on the buttons + breathing area */}
 
           {/* ===== BOTTOM NAV ===== */}
           <footer className="absolute bottom-0 left-0 right-0 z-[70] pointer-events-none flex justify-center" style={{ opacity: headerOpacity, transition: 'opacity 5s ease' }}>
+            {/* ===== MOOD BUTTONS — arc above Meditation tab ===== */}
+            {(() => {
+              const moodKeys = Object.keys(MOOD_MAP);
+              const arcRadius = 62;
+              const angles = [-50, 0, 50];
+              // Total arc width for the "Set your intention" text sizing
+              const arcSpan = 2 * Math.sin(50 * Math.PI / 180) * arcRadius + 40; // ~135px
+              return (
+                <div className="absolute pointer-events-auto transition-all duration-700" style={{
+                  left: `calc(50% + ${medBtnOffset}px)`,
+                  bottom: '62px',
+                  transform: 'translateX(-50%)',
+                  zIndex: 72,
+                  width: 0,
+                  height: 0,
+                  opacity: showMoodButtons ? (intentionHint ? 1 : 0.85) : 0,
+                  pointerEvents: showMoodButtons ? 'auto' : 'none',
+                }}>
+                  {/* "Set your intention" text above arc */}
+                  {intentionHint && (
+                    <div className="absolute flex flex-col items-center pointer-events-none" style={{
+                      bottom: `${arcRadius + 60}px`,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: `${arcSpan}px`,
+                      maxWidth: '180px',
+                    }}>
+                      <p className="text-[12px] font-sans tracking-[0.2em] text-white text-center"
+                        style={{ textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}>
+                        Set your intention
+                      </p>
+                      <p className="text-[8px] tracking-[0.08em] mt-1 text-center leading-snug"
+                        style={{ color: 'rgba(255,255,255,0.6)' }}>
+                        Interact with the world and it will adapt to you
+                      </p>
+                    </div>
+                  )}
+                  {moodKeys.map((key, i) => {
+                    const mood = MOOD_MAP[key];
+                    const isActive = initialMood === key;
+                    const angleRad = (angles[i] - 90) * (Math.PI / 180);
+                    const x = Math.cos(angleRad) * arcRadius;
+                    const y = Math.sin(angleRad) * arcRadius - 10;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => handleMoodSelect(key)}
+                        className={`group absolute w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 cursor-pointer ${intentionHint ? 'intention-glow' : ''}`}
+                        style={{
+                          left: `${x}px`,
+                          top: `${y}px`,
+                          transform: 'translate(-50%, -50%)',
+                          background: intentionHint ? 'rgba(255,255,255,0.25)' : isActive ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.15)',
+                          backdropFilter: 'blur(15px)',
+                          WebkitBackdropFilter: 'blur(15px)',
+                          border: `1px solid ${intentionHint ? 'rgba(255,255,255,0.5)' : isActive ? 'rgba(255,255,255,0.45)' : 'rgba(180,190,175,0.35)'}`,
+                          boxShadow: isActive ? '0 0 12px rgba(255,255,255,0.15), 0 2px 16px rgba(0,0,0,0.06)' : '0 2px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.15)',
+                        }}
+                        title={mood.label}
+                      >
+                        <span className="flex-shrink-0 transition-all duration-500 scale-[0.55]" style={{ color: intentionHint ? 'rgba(255,255,255,1)' : isActive ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.7)' }}>
+                          {MOOD_BRUSHSTROKES[key]}
+                        </span>
+                        <span className="absolute bottom-full mb-2 px-2.5 py-1 rounded-full whitespace-nowrap font-cormorant text-[10px] pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-300"
+                          style={{
+                            background: 'rgba(255,255,255,0.2)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
+                            border: '1px solid rgba(255,255,255,0.18)',
+                            color: 'rgba(255,255,255,0.75)',
+                            letterSpacing: '0.08em',
+                          }}
+                        >
+                          {mood.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
             <nav ref={navRef} className="nav-pill relative mb-4 md:mb-6 pointer-events-auto flex items-center rounded-full p-1.5"
               style={{
                 background: 'rgba(255,255,255,0.25)',
@@ -2265,7 +2326,7 @@
                 <button
                   key={tab.id}
                   data-tab={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => { setActiveTab(tab.id); if (tab.id === 'meditation') setShowMoodButtons(true); }}
                   className="relative z-10 flex items-center gap-1.5 px-4 md:px-5 py-3 rounded-full transition-colors duration-500 font-sans whitespace-nowrap"
                   style={{
                     color: activeTab === tab.id ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.5)',
@@ -2399,27 +2460,7 @@
 
           <AnimatePresence mode="wait">
             {intentionHint ? (
-              <motion.div
-                key="intention-msg"
-                className="fixed top-[18vh] left-1/2 -translate-x-1/2 z-[95] flex flex-col items-center pointer-events-none"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 0.65, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 1 }}
-              >
-                <p
-                  className="text-[14px] font-sans tracking-[0.25em] text-white text-center"
-                  style={{ textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}
-                >
-                  Set your intention
-                </p>
-                <p
-                  className="text-[11px] tracking-[0.15em] mt-1 text-center"
-                  style={{ color: 'rgba(255,255,255,0.65)' }}
-                >
-                  Interact with the world and it will adapt to you
-                </p>
-              </motion.div>
+              <span key="intention-placeholder" />
             ) : (
               <motion.div
                 key="breathing"
